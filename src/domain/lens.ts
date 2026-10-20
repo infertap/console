@@ -78,6 +78,7 @@ export interface ConcentrationQuery {
   readonly limit?: number;
 }
 
+/** One identity in the concentration read: its mass, its spread, its evidence. */
 export interface ConcentrationRow {
   readonly block_id: string;
   /** Recompute mass this identity cost the slice over the window. */
@@ -87,6 +88,7 @@ export interface ConcentrationRow {
   readonly holders_stored: number;
 }
 
+/** The concentration read: which identities cost the slice its recompute, worst first. */
 export interface ConcentrationData {
   readonly register: 'recompute';
   readonly start_ms: number;
@@ -100,6 +102,7 @@ export interface ConcentrationData {
   readonly rows: readonly ConcentrationRow[];
 }
 
+/** The scoped attribution card's ask: the scope, the marker and the window. */
 export interface AttributionQuery {
   /** The scope lens: a cut member key, or `fleet`. */
   readonly scope: string;

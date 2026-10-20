@@ -20,6 +20,7 @@ import type { RouteProps } from '../design-system/navigation/router';
  * keep.
  */
 
+/** One entry of the route table: its pattern, its component, its parent and its title. */
 export interface RouteDef {
   /** A pattern with `:name` segments. Matched left to right, first match wins. */
   readonly path: string;
@@ -31,6 +32,7 @@ export interface RouteDef {
   readonly title: string;
 }
 
+/** The route table: every addressable view, matched top to bottom, first match wins. */
 export const ROUTES: readonly RouteDef[] = [
   {
     path: '/',
@@ -159,6 +161,7 @@ export const ROUTES: readonly RouteDef[] = [
   },
 ];
 
+/** A matched route and the parameters its pattern bound from the address. */
 export interface Match {
   readonly route: RouteDef;
   readonly params: Readonly<Record<string, string>>;

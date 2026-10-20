@@ -25,6 +25,7 @@ import {
  * paths, so `/holder/i-004/0/1` reaches the table rather than a 404.
  */
 
+/** The current address: its path and its query string. */
 export interface Location {
   readonly pathname: string;
   readonly search: string;
@@ -48,6 +49,7 @@ export function navigate(to: string, options: { replace?: boolean } = {}): void 
   for (const listener of LISTENERS) listener();
 }
 
+/** The current address, re-rendering on navigation. */
 export function useLocation(): Location {
   const [location, setLocation] = useState<Location>(read);
 

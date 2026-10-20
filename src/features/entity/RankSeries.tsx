@@ -16,6 +16,7 @@ import styles from './Entity.module.css';
  * Show, don't say: no trend words, no divergence claims. The lines are the claim.
  */
 
+/** One line of the rank series: its key, its label, its values per bucket and its total. */
 export interface SeriesMember {
   readonly key: string;
   readonly label: string;
@@ -41,6 +42,7 @@ const W = 1000;
 const H = 200;
 const PAD = { t: 10, b: 22, l: 46, r: 8 } as const;
 
+/** One line per rank over the window, each a link to its drill. */
 export function RankSeries({
   members,
   labelOf,

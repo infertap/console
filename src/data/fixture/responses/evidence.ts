@@ -13,6 +13,7 @@ import {
   requirePass,
 } from './shared';
 
+/** `/v1/days/{day}`: one settled day's masses, its heaviest holders and its coverage. */
 export function dayFor(
   age: w.AgeScript,
   day: string,
@@ -67,6 +68,7 @@ export function dayFor(
   };
 }
 
+/** `/v1/evidence`: the records behind a figure, bounded by the log's reach and paged. */
 export function evidenceFor(
   age: w.AgeScript,
   query: {

@@ -30,6 +30,7 @@ import styles from './Attribution.module.css';
 /** Footnote daggers, assigned by index in the markers read, matching the chart. */
 export const DAGGERS = ['†', '‡', '§', '‖', '¶'] as const;
 
+/** The footnote dagger a marker wears, by its index in the markers read. */
 export function daggerOf(markers: readonly MarkerJson[], id: string): string {
   const i = markers.findIndex((m) => m.id === id);
   return DAGGERS[i % DAGGERS.length] ?? '†';
@@ -42,6 +43,7 @@ export function markerAtLabel(marker: MarkerJson): string {
     : `${day(marker.at_ms).slice(5)} ${clock(marker.at_ms)}`;
 }
 
+/** The selected marker's before-and-after card, on the panel whose series it marks. */
 export function Attribution({
   markers,
   selectedId,

@@ -28,6 +28,7 @@ function markerJson(seam: w.Seam): MarkerJson {
   };
 }
 
+/** `/v1/markers`: the declared deployments and recorded seams inside the window. */
 export function markersFor(age: w.AgeScript, query: { window?: string } = {}): MarkersData {
   const days = windowDays(query.window, w.TREND_DAYS);
   const from = w.frontierIndex(age) - days + 1;
@@ -81,6 +82,9 @@ export function recordAnnotationFor(age: w.AgeScript, body: AnnotationBody): Ann
   };
 }
 
+/**
+ * `/v1/markers/{id}`: one marker with its before-and-after card, or a refusal where it breaks the series.
+ */
 export function markerFor(id: string): MarkerData {
   const seam = w.SEAMS.find((s) => s.id === id);
   if (!seam) {

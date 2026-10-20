@@ -19,6 +19,7 @@ const W = 1000;
 const H = 170;
 const PAD = { t: 12, b: 22, l: 52, r: 8 } as const;
 
+/** A rate per bucket as a line, with the fleet's median as a faint band behind it. */
 export function RateChart({
   values,
   median,

@@ -80,6 +80,7 @@ function boundRows(bound: unknown): [string, string][] {
   ]);
 }
 
+/** The refusal to render, wire-shaped or already narrowed, and the density of its position. */
 export interface RefusalProps {
   refusal: WireRefusal | NarrowedRefusal;
   /** `inline` for a refused row inside a table; the default fills a section's position. */
@@ -90,6 +91,9 @@ function toNarrowed(refusal: WireRefusal | NarrowedRefusal): NarrowedRefusal {
   return 'rawCause' in refusal ? refusal : narrow(refusal);
 }
 
+/**
+ * A refusal in the answer's position: the cause in the reader's terms, the sentence verbatim, the bound.
+ */
 export function Refusal({ refusal, density = 'section' }: RefusalProps): ReactNode {
   const it = toNarrowed(refusal);
   const rows = boundRows(it.bound);

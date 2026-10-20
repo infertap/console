@@ -10,6 +10,7 @@ import styles from './Block.module.css';
  * independent block, and a control lives in the head of the one block it changes.
  */
 
+/** A section: its heading on the canvas, with one or more independent blocks beneath it. */
 export function Section({
   name,
   id,

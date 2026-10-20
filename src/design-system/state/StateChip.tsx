@@ -15,6 +15,7 @@ import styles from './StateChip.module.css';
  * clocks, and a chip that omits which one it means is the quiet-wrong class.
  */
 
+/** A state word and the clock it was judged on. */
 export interface StateChipProps {
   state: HonestState;
   /** What the state is judged on: "at pass time", "over the window", "per run". */
@@ -33,6 +34,7 @@ export const STATE_MEANING: Readonly<Record<HonestState, string>> = {
   unobserved: 'It reported once and does not now. A departure, not an outage.',
 };
 
+/** A provenance-labelled state chip: one of the five honest states, with what it was judged on. */
 export function StateChip({
   state,
   provenance,

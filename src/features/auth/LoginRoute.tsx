@@ -45,6 +45,7 @@ import styles from './Login.module.css';
  */
 const VIEWER = 'viewer';
 
+/** The sign-in form: the viewer role fixed, the token posted as a body, nothing stored here. */
 export function SignIn({ onSignedIn }: { onSignedIn?: () => void }): ReactNode {
   const source = useDataSource();
   const session = useSession();

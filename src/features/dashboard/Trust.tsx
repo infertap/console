@@ -45,6 +45,7 @@ const MEANING: Readonly<Record<string, string>> = {
   ungraded: 'never declared',
 };
 
+/** Section 3: was the instrument looking, and how much of it is reporting now. */
 export function TrustSection({
   coverage,
   roster,

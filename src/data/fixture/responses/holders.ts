@@ -12,6 +12,7 @@ import type {
 } from '../../../domain/contract';
 import { figure, paginate, reachFor, readFromFor, requirePass, windowSpanDays } from './shared';
 
+/** `/v1/holders`: the holders ranked by the mass asked for, over the window, paged. */
 export function holdersFor(
   age: w.AgeScript,
   query: {
@@ -112,6 +113,7 @@ export function tagsFor(age: w.AgeScript): TagsData {
   };
 }
 
+/** `/v1/blocks/{block_id}/holders`: who holds one block identity, read from the log. */
 export function blockHoldersFor(
   age: w.AgeScript,
   blockId: string,
@@ -147,6 +149,7 @@ export function blockHoldersFor(
   };
 }
 
+/** `/v1/holders/{holder}/timeline`: one holder's store events, newest first, paged. */
 export function timelineFor(
   age: w.AgeScript,
   holder: HolderId,

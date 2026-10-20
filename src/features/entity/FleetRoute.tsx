@@ -27,6 +27,7 @@ import styles from './Entity.module.css';
  */
 
 
+/** Level 1: the fleet, the front door of the facet hierarchy. */
 export default function FleetRoute(_props: RouteProps): ReactNode {
   const workloads = useResource('fleet:workloads', (ds) =>
     ds.figures({ window: DEFAULT_WINDOW, grain: 'day', dims: ['workload', 'class'] }),

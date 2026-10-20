@@ -22,6 +22,7 @@ import { DEPLOYS, TODAY } from './world';
 
 /** 288 five-minute buckets: one contiguous day ending twenty minutes past the last deploy. */
 export const LEDGER_N = 288;
+/** The ledger's first bucket, a day before it closes twenty minutes past the last deploy. */
 export const LEDGER_START_MS = Date.parse(`${TODAY}T14:40:00Z`) - 24 * 3_600_000;
 
 interface LedgerScope {
@@ -132,6 +133,7 @@ export function attributionFor(query: AttributionQuery): AttributionCard {
   };
 }
 
+/** The arithmetic the ledger corpus must satisfy, each named, for the world test to assert. */
 export function ledgerInvariants(): readonly { name: string; holds: boolean }[] {
   const affinity = DEPLOYS.find((d) => d.id === 'affinity-weights');
   const atMs = affinity?.atMs ?? 0;

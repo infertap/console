@@ -77,6 +77,9 @@ function runPopulation(age: w.AgeScript): { counts: Record<string, number>; rows
   return { counts, rows: all };
 }
 
+/**
+ * `/v1/roster`: every observed run with its state and reason, judged against the platform threshold, paged.
+ */
 export function rosterFor(
   age: w.AgeScript,
   query: { limit?: number; cursor?: string } = {},
@@ -114,6 +117,7 @@ export function rosterFor(
   };
 }
 
+/** `/v1/coverage`: the two coverage bases over the window, for the fleet or per instance. */
 export function coverageFor(
   age: w.AgeScript,
   query: { window?: string; by?: 'fleet' | 'instance' } = {},

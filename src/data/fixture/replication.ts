@@ -37,8 +37,11 @@ const HOUR_MS = 3_600_000;
 
 /** The fleet's daily rates. Duplicated mass is a small share of cached mass, deliberately. */
 export const DUP_TH_DAY = 11_400;
+/** Token-hours the fleet caches per day, the denominator of every duplication share. */
 export const CACHED_TH_DAY = 250_600;
+/** Mean simultaneous copies over the duplicated mass, just above one on a mostly unique fleet. */
 export const MEAN_COPIES = 1.06;
+/** The share of duplicated mass held across engines rather than within one. */
 export const CROSS_ENGINE_SHARE = 0.71;
 /**
  * The third remedy bucket's share: duplicated mass that exists only because a
@@ -341,6 +344,7 @@ export function instanceDuplicationResponse(
   };
 }
 
+/** The arithmetic the replication corpus must satisfy, each named, for the world test to assert. */
 export function replicationInvariants(): readonly { name: string; holds: boolean }[] {
   const workloads = COPIES_CUTS.filter((m) => m.key !== 'fleet');
   const fleet = replicationResponse({ window: '14d' });

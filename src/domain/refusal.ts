@@ -77,6 +77,9 @@ export interface NarrowedRefusal {
   readonly requested?: unknown;
 }
 
+/**
+ * Narrow a wire refusal: the cause against the closed set, the raw word kept, bound and request carried.
+ */
 export function narrow(refusal: Refusal): NarrowedRefusal {
   return {
     cause: asCause(refusal.cause),

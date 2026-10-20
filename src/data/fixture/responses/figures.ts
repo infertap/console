@@ -18,6 +18,7 @@ import {
 } from './shared';
 import type { DayMass } from './shared';
 
+/** `/v1/figures`: the classified mass per bucket over the window, cut by the dims asked for. */
 export function figuresFor(
   age: w.AgeScript,
   query: {

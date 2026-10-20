@@ -16,13 +16,16 @@ import { ApiError } from '../../../domain/refusal';
 import { THRASH_EDGE_MS, holderMember } from '../thrash';
 
 const TOKEN_WEIGHTED = 'token-weighted';
+/** The coverage basis that asks whether telemetry was present at all. */
 export const INSTANCE_TIME = 'instance-time';
 const LOWER_BOUND = '>=';
 
+/** A covered figure as the wire states it: a lower bound with its coverage and basis. */
 export function figure(value: number, coverage: number, kind = TOKEN_WEIGHTED): Figure {
   return { value, register: LOWER_BOUND, coverage, coverage_kind: kind };
 }
 
+/** The window object a response carries, from two day strings. */
 export function windowJson(startDay: string, endDay: string): WindowJson {
   return {
     start_day: startDay,
@@ -110,6 +113,7 @@ const CLASS_SPLIT: readonly (readonly [string, number])[] = [
   ['indeterminate', 0.01],
 ];
 
+/** One day of the corpus's classified mass, by class, with its coverage and event count. */
 export interface DayMass {
   readonly date: string;
   readonly dayIdx: number;
@@ -296,6 +300,7 @@ export function minuteBounds(raw: string | undefined): { readonly startMs: numbe
   return null;
 }
 
+/** One day's buckets, one per class and per dim value asked for. */
 export function bucketsFor(day: DayMass, dims: readonly string[]): Bucket[] {
   const byClass: (readonly [string, number])[] = [
     ['ETR', day.etr],
@@ -441,6 +446,7 @@ interface PageOptions {
   readonly ranking?: boolean;
 }
 
+/** A page of `all` under the stamp's cursor rules: limit capped, cursor bound to the tick. */
 export function paginate<T>(
   all: readonly T[],
   age: w.AgeScript,
@@ -500,6 +506,7 @@ export function storedShareOf(instance: string): number {
   return w.STORED_SHARES.get(instance) ?? 0;
 }
 
+/** The slice a scoped read answers about: holder beats instance, a malformed holder is a 404. */
 export function resolveScope(query: {
   workload?: string;
   instance?: string;
@@ -588,6 +595,7 @@ export function readFromFor(subject: 'holder' | 'block'): string {
   return subject === 'holder' ? 'ring' : 'log';
 }
 
+/** `/v1/stamp`'s data body: whether a tick has run. */
 export function stampDataFor(age: w.AgeScript): { ready: boolean } {
   return { ready: age.passes > 0 };
 }

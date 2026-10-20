@@ -9,6 +9,9 @@ import styles from './Entity.module.css';
  * register in the unit line, its qualifier in the sub line, and its evidence in the hover.
  */
 
+/**
+ * One stat tile: the value, what it is of, a qualifier, a sparkline and the evidence in the hover.
+ */
 export interface Tile {
   readonly value: string;
   /** What the value is OF: the denominator's name, e.g. "of cache work recomputed". */
@@ -37,6 +40,7 @@ function Spark({ values }: { values: readonly number[] }): ReactNode {
   );
 }
 
+/** A row of stat tiles. */
 export function StatRow({ tiles }: { tiles: readonly Tile[] }): ReactNode {
   return (
     <div className={styles['statRow']}>

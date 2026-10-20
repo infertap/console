@@ -22,6 +22,7 @@ import {
  * too (`AUTO_GRAIN_MINUTE_POINT_BUDGET` 240, `AUTO_GRAIN_HOUR_POINT_BUDGET` 200).
  */
 export const MINUTE_RETENTION_DAYS = 2;
+/** How far back the hourly tables reach. */
 export const HOURLY_RETENTION_DAYS = 365;
 const MINUTE_POINT_BUDGET = 240;
 const HOUR_POINT_BUDGET = 200;

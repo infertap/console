@@ -22,6 +22,7 @@ import styles from './BandStack.module.css';
  * readout line under the chart, so the layout never jumps and the bars never carry text.
  */
 
+/** One band of the stack: its wire key, its label and the tone it is painted in. */
 export interface Band {
   readonly key: string;
   readonly label: string;
@@ -29,6 +30,7 @@ export interface Band {
   readonly tone: string;
 }
 
+/** A marker drawn on the chart: a labelled vertical rule with its footnote dagger. */
 export interface ChartMarker {
   readonly id: string;
   readonly dagger: string;
@@ -41,6 +43,7 @@ export interface ChartMarker {
 const W = 1000;
 const PAD = { t: 18, b: 22, l: 46, r: 8 } as const;
 
+/** The banded time series: mass per bucket, stacked by band, with markers and a hover readout. */
 export function BandStack({
   rows,
   bands,

@@ -16,6 +16,9 @@ import { GAP_BANDS } from './lens';
 /** The wire's band order, index-aligned with `GAP_BANDS`. */
 const BAND_INDEX = new Map<string, number>(GAP_BANDS.map((band, i) => [band.key, i]));
 
+/**
+ * One cut member's rows in the bands view: its mass per bucket per band, its total and coverage.
+ */
 export interface BandMember {
   /** The cut member's wire value, or `fleet` for the uncut read. */
   readonly key: string;
@@ -28,6 +31,7 @@ export interface BandMember {
   readonly coverage: number;
 }
 
+/** The bands response arranged for drawing: a shared time axis and one member per cut value. */
 export interface BandsView {
   /** Bucket open instants, oldest first: the shared time axis of every member. */
   readonly bucketsMs: readonly number[];

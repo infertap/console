@@ -12,6 +12,7 @@ export type SourceKind = 'fixture' | 'live';
 
 /** The document's four ages, as the fixture corpus scripts them. */
 export const AGES = ['t0', 't1', 't2', 't3'] as const;
+/** One of the four scripted ages of the fixture corpus. */
 export type Age = (typeof AGES)[number];
 
 /**
@@ -35,6 +36,7 @@ export interface Posture {
   readonly licenceFooter: boolean;
 }
 
+/** Everything the console reads from its environment, resolved once at bootstrap. */
 export interface Config {
   /**
    * Origin-relative, and empty by default. The production posture is same-origin: the daemon
@@ -68,6 +70,7 @@ function readAge(raw: string | undefined): Age {
   return (AGES as readonly string[]).includes(raw ?? '') ? (raw as Age) : 't3';
 }
 
+/** The configuration this bundle runs with, frozen at bootstrap. */
 export const config: Config = Object.freeze({
   apiBase: import.meta.env['VITE_API_BASE'] ?? '',
   source: readSource(import.meta.env['VITE_SOURCE']),

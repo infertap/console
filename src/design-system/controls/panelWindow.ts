@@ -39,6 +39,9 @@ export interface PanelWindow {
   readonly setTo: (value: string, showing: WindowDesc) => void;
 }
 
+/**
+ * A panel's window state under its own parameter prefix: the stop, the custom bounds, and the ask.
+ */
 export function usePanelWindow(
   prefix: string,
   offered: readonly WindowStop[] = WINDOW_STOPS,

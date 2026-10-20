@@ -27,10 +27,14 @@ import styles from './Figure.module.css';
  *   axis and never share a hue family, so that the separation of the registers holds by construction.
  */
 
+/** The two registers a figure can belong to. They never share an axis or a hue. */
 export type AccountingRegister = 'recompute' | 'capacity';
+/** The size tier a figure renders at. */
 export type FigureTier = 'hero' | 'panel' | 'cell';
+/** How a figure's value is written. */
 export type FigureFormat = 'integer' | 'percent' | 'compact';
 
+/** A figure's inputs: the whole covered value, its unit, its register, and how to render it. */
 export interface FigureProps {
   /** The whole covered value. There is deliberately no way to pass a bare number. */
   value: CoveredFigure;
@@ -55,6 +59,9 @@ function boundGlyph(register: string): string {
   return register === '>=' ? '≥' : register;
 }
 
+/**
+ * A covered figure on the glass: the bound, the value, the unit, and the coverage with its basis.
+ */
 export function Figure({
   value,
   unit,
@@ -90,6 +97,9 @@ export function Figure({
   );
 }
 
+/**
+ * The designed absence's inputs: why there is no number, the unit it will carry, and the register.
+ */
 export interface UnmeasuredProps {
   /** Why there is no number. Never `fine`, which would be a contradiction. */
   state: Exclude<HonestState, 'fine'>;

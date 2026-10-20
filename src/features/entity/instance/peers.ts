@@ -3,6 +3,7 @@
 import type { FiguresData } from '../../../domain/contract';
 import { RECOMPUTE_CLASSES } from '../../../domain/trend';
 
+/** Every instance's recompute and total over the window, and the per-bucket median rate. */
 export function peerCells(data: FiguresData): {
   windowByInstance: Map<string, { recompute: number; total: number }>;
   medianByBucket: Map<string, number>;

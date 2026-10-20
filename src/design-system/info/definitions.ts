@@ -19,6 +19,9 @@
  * and belongs nowhere in this product.
  */
 
+/**
+ * What a definition hover teaches: what it measures, how it is computed, its basis and its bound.
+ */
 export interface Definition {
   readonly measures: string;
   readonly computed: string;
@@ -26,6 +29,7 @@ export interface Definition {
   readonly bound: string;
 }
 
+/** Every definition the info hovers can show, keyed by the figure or section it defines. */
 export const DEFINITIONS = {
   repeat_compute: {
     measures:
@@ -246,4 +250,5 @@ export const DEFINITIONS = {
   },
 } as const satisfies Record<string, Definition>;
 
+/** A key into `DEFINITIONS`. */
 export type DefinitionKey = keyof typeof DEFINITIONS;

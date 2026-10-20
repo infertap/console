@@ -13,6 +13,7 @@ import { percent } from '../../design-system/format/numbers';
 /** A rate, at the precision its size needs to be legible. */
 export const rate = (v: number): string => percent(v, v < 0.02 ? 2 : 1);
 
+/** One bucket of a rate series: recompute, total and the coverage-weighted recompute. */
 export interface RatePoint {
   readonly key: string;
   readonly recompute: number;
@@ -40,6 +41,7 @@ export function ratePoints(data: FiguresData): RatePoint[] {
     .map(([key, c]) => ({ key, ...c }));
 }
 
+/** One cut member's recompute and total over the window. */
 export interface MemberCell {
   recompute: number;
   total: number;

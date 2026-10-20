@@ -10,12 +10,14 @@ import styles from './AnchorLine.module.css';
  * such a line is the meter face; this is not a second verdict and carries no state word.
  */
 
+/** One labelled fact beside the anchor's fraction. */
 export interface AnchorItem {
   readonly label: string;
   readonly value: string;
   readonly tip?: string;
 }
 
+/** The anchor line: the headline fraction with its denominator, then the facts that qualify it. */
 export function AnchorLine({
   headline,
   unit,

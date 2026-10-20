@@ -15,8 +15,11 @@
  * arrive in the response; this module dresses what was served.
  */
 
+/** One minute, in milliseconds. */
 export const MIN_MS = 60_000;
+/** One hour, in milliseconds. */
 export const HOUR_MS = 3_600_000;
+/** One day, in milliseconds. */
 export const DAY_MS = 86_400_000;
 
 /**
@@ -33,7 +36,9 @@ export const WINDOW_STOPS = [
   { key: 'custom', label: 'custom' },
 ] as const;
 
+/** A stop's key: one of the panel stops, or `custom`. */
 export type WindowKey = (typeof WINDOW_STOPS)[number]['key'];
+/** A stop as the control offers it: its key and its label. */
 export interface WindowStop {
   readonly key: WindowKey;
   readonly label: string;
@@ -71,6 +76,7 @@ export function stopGrain(key: '14d' | '48h' | '3h'): 'day' | 'hour' | 'minute' 
   return key === '14d' ? 'day' : key === '48h' ? 'hour' : 'minute';
 }
 
+/** A window as a chart consumes it: grain, bucket count and width, start, labels and ticks. */
 export interface WindowDesc {
   readonly key: WindowKey;
   /** The control's label for this stop. */
@@ -207,6 +213,7 @@ export function perDay(tokenMs: number, spanMs: number): number {
 
 // ── Markers on the window ────────────────────────────────────────────────────────────────────
 
+/** A marker's position on a window, as a fraction of its span. */
 export interface MarkerMark {
   readonly id: string;
   /** Horizontal position, as a fraction of the window. */
@@ -219,6 +226,7 @@ export function markerFrac(atMs: number, desc: WindowDesc): number | null {
   return f >= 0 && f <= 1 ? f : null;
 }
 
+/** A marker's before and after spans on a window, as fractions. */
 export interface SpanFracs {
   /** Before-span start, marker instant, after-span end, as window fractions. */
   readonly b0: number;

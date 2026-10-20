@@ -214,6 +214,7 @@ export interface LensReads {
   identityConcentration(query: ConcentrationQuery): Promise<Stamped<ConcentrationData>>;
 }
 
+/** The session half of the seam: sign in with the token, sign out. */
 export interface SessionApi {
   /**
    * Exchange the plaintext token for a session cookie.
@@ -247,5 +248,7 @@ export type StreamEvent =
   | { readonly type: 'open' }
   | { readonly type: 'closed'; readonly willRetry: boolean };
 
+/** A subscriber to the event stream. */
 export type StreamListener = (event: StreamEvent) => void;
+/** Ends a stream subscription. */
 export type Unsubscribe = () => void;

@@ -9,6 +9,7 @@ import { COPY_BANDS } from '../../../domain/lens';
 
 /** The dashboard's copy-band tones, in band order: the same four the workload page paints. */
 const COPY_TONES = ['var(--cap-4)', 'var(--cap-3)', 'var(--cap-2)', 'var(--cap-1)'] as const;
+/** The copies bands with the tones the panel paints them in. */
 export const COPY_BAND_ROWS: readonly Band[] = COPY_BANDS.map((band, i) => ({
   ...band,
   tone: COPY_TONES[i] ?? 'var(--pencil)',
@@ -31,11 +32,13 @@ export function copiesBandIndex(band: string): number {
 
 /** The duplication panel's secondary axis: where the copies sat. */
 export type Locality = 'within' | 'group' | 'both';
+/** The locality axis's options, each with the words the head and the hover use. */
 export const LOCALITIES: readonly { id: Locality; label: string; words: string }[] = [
   { id: 'within', label: 'within ranks', words: 'across its ranks' },
   { id: 'group', label: 'across cache groups', words: 'across its cache groups' },
   { id: 'both', label: 'both', words: 'across ranks and cache groups' },
 ];
+/** The words for a locality, as the head and the hover say them. */
 export const localityWords = (locality: Locality): string =>
   LOCALITIES.find((l) => l.id === locality)?.words ?? '';
 

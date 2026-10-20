@@ -43,6 +43,7 @@ import styles from './Entity.module.css';
  * minute cells do not keep.
  */
 
+/** Level 1: one rank of one instance, where a holder is a rank. */
 export default function RankRoute({ params }: RouteProps): ReactNode {
   const holder = {
     instance: params['id'] ?? '',

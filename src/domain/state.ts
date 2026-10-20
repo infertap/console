@@ -7,6 +7,7 @@
  * never looked" is the whole product.
  */
 
+/** The five state words, in declaration order. */
 export const HONEST_STATES = [
   /** Observed, within its declared bounds. */
   'fine',
@@ -20,6 +21,7 @@ export const HONEST_STATES = [
   'unobserved',
 ] as const;
 
+/** One of the five honest states. */
 export type HonestState = (typeof HONEST_STATES)[number];
 
 const KNOWN = new Set<string>(HONEST_STATES);

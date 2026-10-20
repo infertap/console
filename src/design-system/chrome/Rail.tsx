@@ -14,6 +14,7 @@ import styles from './Chrome.module.css';
  * pointing at a surface the API has no answer for is a promise this product cannot keep.
  */
 
+/** One rail entry: where it goes, its label, its glyph, and the drill pages it owns. */
 export interface Destination {
   readonly to: string;
   readonly label: string;
@@ -22,6 +23,7 @@ export interface Destination {
   readonly owns?: readonly string[];
 }
 
+/** The rail's destinations, in order. Destinations, never sections. */
 export const DESTINATIONS: readonly { group: string | null; items: readonly Destination[] }[] = [
   {
     group: null,
@@ -54,6 +56,7 @@ function isCurrent(pathname: string, item: Destination): boolean {
   return pathname === item.to || (item.owns ?? []).some((p) => pathname.startsWith(p));
 }
 
+/** The left rail: the destinations, the active one lit, collapsible to glyphs. */
 export function Rail(): ReactNode {
   const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(false);

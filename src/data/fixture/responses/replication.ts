@@ -83,6 +83,9 @@ const rngFor = (seed: number): (() => number) => {
   return () => ((st = (st * 1664525 + 1013904223) >>> 0) / 4294967296);
 };
 
+/**
+ * `/v1/residual/replication`: duplicated token-hours per bucket by copy band, with the members table.
+ */
 export function replicationFor(
   age: w.AgeScript,
   query: { window?: string; grain?: string; workload?: string } = {},

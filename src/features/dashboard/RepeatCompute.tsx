@@ -75,6 +75,7 @@ const CUT_DIMS: Readonly<Record<CutKey, string | null>> = {
 /** The instance cut's table is a top-N of the nodes the read returned, worst first. */
 const INSTANCE_CUT_TOP = 8;
 
+/** Section 1: the repeat-compute meter, the anchor line and the thrash lens as its face. */
 export function RepeatCompute({
   figures,
   markers,

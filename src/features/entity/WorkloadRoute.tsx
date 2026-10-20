@@ -51,6 +51,7 @@ import styles from './Entity.module.css';
  * corner case would treat the default first-run state as one.
  */
 
+/** Level 1: one workload, its rate against the fleet, its members and its duplication. */
 export default function WorkloadRoute({ params }: RouteProps): ReactNode {
   const id = params['id'] ?? '';
   const [rawWin, setWin] = useQueryParam('win');

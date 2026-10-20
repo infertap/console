@@ -28,6 +28,7 @@ import styles from './Entity.module.css';
  * and live mode states the absence rather than borrowing a fleet answer for a rank question.
  */
 
+/** Level 1: the identities a scope's recompute concentrates in. */
 export default function IdentitiesRoute(_props: RouteProps): ReactNode {
   const [holder] = useQueryParam('holder');
   const [instance] = useQueryParam('instance');

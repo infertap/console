@@ -17,6 +17,7 @@ import styles from './Entity.module.css';
  * it — so the shape and the names never have to be cross-referenced by eye.
  */
 
+/** One member of the distribution: its key, its label, its value and the evidence behind it. */
 export interface DistMember {
   readonly key: string;
   readonly label: string;
@@ -26,6 +27,7 @@ export interface DistMember {
   readonly detail?: string;
 }
 
+/** A cut's members drawn as a distribution, the subject marked, each member a link. */
 export function MemberDistribution({
   members,
   noun,

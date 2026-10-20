@@ -309,6 +309,7 @@ export function thrashSeriesFor(
   return rows;
 }
 
+/** The arithmetic the thrash corpus must satisfy, each named, for the world test to assert. */
 export function thrashInvariants(): readonly { name: string; holds: boolean }[] {
   const shareSum = (cut: CutKey): number => CUTS[cut].reduce((a, m) => a + m.share, 0);
   const profileSums = Object.values(CUTS)

@@ -48,6 +48,9 @@ interface Cell {
   readonly coverage: number;
 }
 
+/**
+ * The pair matrix: duplicated token-hours by workload pair, fleet-wide, with the within-engine column.
+ */
 export function PlacementMatrix({
   placement,
   workload,

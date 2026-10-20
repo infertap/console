@@ -57,6 +57,7 @@ function StatusWord({ row }: { row: RunRow }): ReactNode {
   );
 }
 
+/** The slot's identity and state: its newest run, its pod, model, engine and last word. */
 export function IdentityBlock({
   roster,
   instance,

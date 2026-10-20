@@ -58,6 +58,7 @@ const BANDS: readonly Band[] = COPY_BANDS.map((band, i) => ({
   tone: COPY_TONES[i] ?? 'var(--pencil)',
 }));
 
+/** Section 2: the copies histogram as the headline, the pair matrix and the members behind it. */
 export function PlacementSection({
   placement,
   markers,

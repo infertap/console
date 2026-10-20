@@ -10,6 +10,7 @@ import styles from './KpiRow.module.css';
  * rides, because a percent without its base is half a claim and the base does not earn glass.
  */
 
+/** One tile: a value, its label, an optional width and hover tip. */
 export interface Kpi {
   readonly value: string;
   readonly label: string;
@@ -18,6 +19,7 @@ export interface Kpi {
   readonly tip?: string;
 }
 
+/** A row of KPI tiles, numbers first, words as labels and hover definitions. */
 export function KpiRow({ kpis }: { kpis: readonly Kpi[] }): ReactNode {
   return (
     <div className={styles['row']}>
