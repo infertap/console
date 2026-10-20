@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 /**
- * Local rules for the laws that live in the README and would otherwise live only there.
+ * Local rules for the laws that live in docs/design.md and would otherwise live only there.
  *
  * A law a component author has to remember is a law that holds until the day it is busy.
  */
