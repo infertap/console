@@ -5,7 +5,7 @@ import { Link } from '../../design-system/navigation/router';
 import styles from './Entity.module.css';
 
 /**
- * Members drawn as a distribution, not a ranked table (entity-page ruling, 2026-09-01).
+ * Members drawn as a distribution, not a ranked table.
  *
  * "One offender or all of them" is a shape question, and a sorted table shows the top without
  * showing whether the top is ten percent or ten times above the median. The columns are the
@@ -17,6 +17,7 @@ import styles from './Entity.module.css';
  * it — so the shape and the names never have to be cross-referenced by eye.
  */
 
+/** One member of the distribution: its key, its label, its value and the evidence behind it. */
 export interface DistMember {
   readonly key: string;
   readonly label: string;
@@ -26,6 +27,7 @@ export interface DistMember {
   readonly detail?: string;
 }
 
+/** A cut's members drawn as a distribution, the subject marked, each member a link. */
 export function MemberDistribution({
   members,
   noun,

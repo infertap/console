@@ -17,6 +17,9 @@ import styles from './Chrome.module.css';
  * wall-clock surface. No accounting figure animates, ever.
  */
 
+/**
+ * What the strip shows: the fleet, the stamp, the ingest pulse, and the optional analyze-now kick.
+ */
 export interface StatusStripProps {
   fleet: string;
   stamp: Stamp;
@@ -32,6 +35,7 @@ export interface StatusStripProps {
   onAnalyzeNow?: () => Promise<{ data: AnalyzeData }>;
 }
 
+/** The one dark row: wall-clock-live facts and the controls, never an accounting figure. */
 export function StatusStrip({
   fleet,
   stamp,

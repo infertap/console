@@ -61,8 +61,8 @@ import type {
  * nothing outside `src/data` may name the generated client, call `fetch`, or open an
  * `EventSource`.
  *
- * The method list is the endpoint list is the DAO method list — `docs/dashboard.md` §9 states
- * that as a law, and it holds across the repo split because both sides read the same contract.
+ * The method list is the endpoint list is the DAO method list: one law, and it holds across
+ * the repo split because both sides read the same contract.
  * 24 paths, 25 operations, at the pin recorded in `contract/PIN.md`.
  */
 export interface DataSource {
@@ -122,7 +122,7 @@ export interface DataSource {
    * resolve server-side through the same window authority as the copies read, so the page's
    * two zoom charts cannot disagree about which hours exist. Minute grain serves within the
    * tier's measured reach at the fleet, workload, model and instance cuts and under an
-   * instance or holder scope (the rank-grain cells, landing 7); the holder cut refuses it by
+   * instance or holder scope (the rank-grain cells); the holder cut refuses it by
    * name, a window past reach refuses with its bound, and both refusals render.
    */
   figureBands(query?: BandsQuery): Promise<Stamped<BandsData>>;
@@ -179,7 +179,7 @@ export interface DataSource {
    *
    * **Optional is the design, not a shortcut.** The fixture source implements them; the live
    * source leaves them absent until the analyzer lands the endpoints, and a panel whose read is
-   * absent renders its awaiting-endpoint state. This is what lets a v3 panel exist on the page
+   * absent renders its awaiting-endpoint state. This is what lets a panel exist on the page
    * before its data does, without a feature ever importing the corpus directly: the corpus
    * stays behind the seam, reachable only through the rig, and the bundle audit stays green.
    */
@@ -199,11 +199,10 @@ export interface DataSource {
   events(listener: StreamListener): Unsubscribe;
 }
 
-/** The pre-contract read set. Each method retires into the contract section when its endpoint
- * lands, and the panels that call it move no render code. The bands, copies, anchor and
- * coverage-join reads all graduated at pin `2d0db9e`; what remains is the scoped attribution
- * card, which the live card now computes from two contract reads and the fixture still scripts
- * whole (both registers, every scope, both scenarios). */
+/** The reads with no endpoint yet. Each method retires into the contract section when its
+ * endpoint lands, and the panels that call it move no render code. What remains is the scoped
+ * attribution card, which the live card computes from two contract reads and the fixture
+ * scripts whole (both registers, every scope, both scenarios). */
 export interface LensReads {
   /** The before/after card around a marker, in the operator's scope lens. */
   attribution(query: AttributionQuery): Promise<Stamped<AttributionCard>>;
@@ -215,12 +214,13 @@ export interface LensReads {
   identityConcentration(query: ConcentrationQuery): Promise<Stamped<ConcentrationData>>;
 }
 
+/** The session half of the seam: sign in with the token, sign out. */
 export interface SessionApi {
   /**
    * Exchange the plaintext token for a session cookie.
    *
    * A JSON body, not an `Authorization` header. The contract is generated from the handlers and
-   * says body; `read-api.md` §6.3 still shows bearer, and the contract wins.
+   * says body, and the contract is what this code follows.
    */
   create(token: string): Promise<void>;
   destroy(): Promise<void>;
@@ -248,5 +248,7 @@ export type StreamEvent =
   | { readonly type: 'open' }
   | { readonly type: 'closed'; readonly willRetry: boolean };
 
+/** A subscriber to the event stream. */
 export type StreamListener = (event: StreamEvent) => void;
+/** Ends a stream subscription. */
 export type Unsubscribe = () => void;

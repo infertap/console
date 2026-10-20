@@ -17,7 +17,7 @@ import { useQueryParams } from '../navigation/router';
  * panel asks its read for.
  *
  * **Containment holds.** Each panel owns its own window under its own parameter prefix, so two
- * panels on one page move independently, as the v3 ruling requires. What they share is the
+ * panels on one page move independently. What they share is the
  * VOCABULARY: the same stops, the same default, the same parameter shape, from one place. Four
  * panels each declaring their own stop list is how "3 h" came to mean two things on one page.
  *
@@ -39,6 +39,9 @@ export interface PanelWindow {
   readonly setTo: (value: string, showing: WindowDesc) => void;
 }
 
+/**
+ * A panel's window state under its own parameter prefix: the stop, the custom bounds, and the ask.
+ */
 export function usePanelWindow(
   prefix: string,
   offered: readonly WindowStop[] = WINDOW_STOPS,

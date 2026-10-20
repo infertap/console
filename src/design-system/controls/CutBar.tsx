@@ -10,15 +10,17 @@ import styles from './CutBar.module.css';
  * this component never reaches for shared state; the owning panel passes state down and receives
  * the pick back, and URL is state at that layer.
  *
- * Per the v3.1 affordance rule, a box is something you can press: the segmented group keeps its
+ * A box is something you can press: the segmented group keeps its
  * box and responds on hover, which is what separates it from a label.
  */
 
+/** One choice in a segmented group. */
 export interface CutOption {
   readonly id: string;
   readonly label: string;
 }
 
+/** A labelled segmented group: its options, the current one, and the pick handler. */
 export interface CutGroup {
   readonly label: string;
   readonly options: readonly CutOption[];
@@ -26,6 +28,7 @@ export interface CutGroup {
   readonly onSelect: (id: string) => void;
 }
 
+/** One or more segmented groups in a block's head, each changing only what its block contains. */
 export function CutBar({ groups }: { groups: readonly CutGroup[] }): ReactNode {
   return (
     <div className={styles['bar']}>

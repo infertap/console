@@ -2,15 +2,14 @@
 /**
  * The thrash corpus: repeat-compute mass, decomposed by how long the block had been evicted.
  *
- * **Contract-shaped since pin `2d0db9e`**: `/v1/figures/bands` landed with the observed bands
- * in rows (four since the examined history became an hour), the cut riding `dims`, and the
+ * **Contract-shaped**: `/v1/figures/bands` carries the observed bands in rows (four, the
+ * examined history being an hour), the cut riding `dims`, and the
  * gap-unobserved mass as its own figure beside the bands, never one of them. This file scripts the cut members and the series; `responses.ts`
  * assembles the wire bytes and `test/fixture-parity.test.ts` validates them.
  *
- * Minute buckets serve since the banded-minute ruling (analyzer `27c491f`) at the fleet,
- * workload and model cuts; the holder cut refuses them by name, and the corpus models both.
- * The panel stops `14d`/`48h`/`3h` resolve against the emission frontier through the same
- * window authority as the copies read (pin `eb511e6`).
+ * Minute buckets serve at the fleet, workload and model cuts; the holder cut refuses them by
+ * name, and the corpus models both. The panel stops `14d`/`48h`/`3h` resolve against the
+ * emission frontier through the same window authority as the copies read.
  *
  * The series is scaffolding ported from `mockups/v3/index.html`: rag-batch is the churner, the
  * affinity deploy moves the short bands at the marker, and the win/regression scenarios move
@@ -310,6 +309,7 @@ export function thrashSeriesFor(
   return rows;
 }
 
+/** The arithmetic the thrash corpus must satisfy, each named, for the world test to assert. */
 export function thrashInvariants(): readonly { name: string; holds: boolean }[] {
   const shareSum = (cut: CutKey): number => CUTS[cut].reduce((a, m) => a + m.share, 0);
   const profileSums = Object.values(CUTS)

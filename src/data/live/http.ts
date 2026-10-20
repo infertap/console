@@ -16,6 +16,7 @@ import type { paths } from '../generated/api';
 /** Every path the contract declares. A typo is a type error, not a 404 at runtime. */
 export type Route = keyof paths;
 
+/** A value a query parameter can carry; arrays repeat the key, undefined is omitted. */
 export type QueryValue = string | number | boolean | readonly string[] | undefined;
 
 /**
@@ -89,6 +90,9 @@ const PASS_DERIVED: ReadonlySet<string> = new Set<Route>([
   '/v1/holders/{instance}/{dp_rank}/{group_idx}/timeline',
 ]);
 
+/**
+ * GET one contract route and return its stamped envelope, or throw the API's error with its cause.
+ */
 export async function getStamped<T>(
   route: Route,
   params?: Readonly<Record<string, string | number>>,

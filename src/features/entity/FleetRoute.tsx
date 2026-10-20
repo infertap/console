@@ -27,6 +27,7 @@ import styles from './Entity.module.css';
  */
 
 
+/** Level 1: the fleet, the front door of the facet hierarchy. */
 export default function FleetRoute(_props: RouteProps): ReactNode {
   const workloads = useResource('fleet:workloads', (ds) =>
     ds.figures({ window: DEFAULT_WINDOW, grain: 'day', dims: ['workload', 'class'] }),
@@ -48,7 +49,7 @@ export default function FleetRoute(_props: RouteProps): ReactNode {
 }
 
 /** The workloads, as chips with their rates: the middle facet's doors. Collapses to a
- * sentence where the fleet carries one, per the single-workload ruling. */
+ * sentence where the fleet carries one. */
 function WorkloadStrip({ workloads }: { workloads: Resource<Stamped<FiguresData>> }): ReactNode {
   const head = `workloads · ${stopLabel(DEFAULT_WINDOW)}`;
   const hover = <InfoHover of="entity_scope" label="scope" />;

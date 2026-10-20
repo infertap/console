@@ -12,6 +12,7 @@ export type SourceKind = 'fixture' | 'live';
 
 /** The document's four ages, as the fixture corpus scripts them. */
 export const AGES = ['t0', 't1', 't2', 't3'] as const;
+/** One of the four scripted ages of the fixture corpus. */
 export type Age = (typeof AGES)[number];
 
 /**
@@ -19,23 +20,23 @@ export type Age = (typeof AGES)[number];
  *
  * **Every flag here is a seam, and every flag here is off.** The embedded posture is the only
  * one that ships: the daemon serves this bundle from its own console mount, so the console and
- * the API share an origin and there is no second tenant to name. The 2026-07-31 ruling is that
- * the envelope fence is a safety limit and not a feature gate, with nothing reserved for a cloud
- * tier, so these exist to be a place for that question to land rather than a plan to answer it.
+ * the API share an origin and there is no second tenant to name. The envelope fence is a safety
+ * limit and not a feature gate, with nothing reserved for a cloud tier, so these exist to be a
+ * place for that question to land rather than a plan to answer it.
  */
 export interface Posture {
   /** Reserved. One analyzer, one fleet, one console. */
   readonly multiFleet: boolean;
   /**
-   * Reserved. `/v1/reports` was sidelined by ruling on 2026-08-04: the route is not reserved
-   * and not refusing, it does not exist. The rail must not offer a destination the API has no
-   * answer for.
+   * Reserved. The API has no `/v1/reports` route, and the rail must not offer a destination
+   * the API has no answer for.
    */
   readonly reportsDestination: boolean;
   /** Reserved. OPEN-1: whether the licence numbers belong on the console at all. */
   readonly licenceFooter: boolean;
 }
 
+/** Everything the console reads from its environment, resolved once at bootstrap. */
 export interface Config {
   /**
    * Origin-relative, and empty by default. The production posture is same-origin: the daemon
@@ -69,6 +70,7 @@ function readAge(raw: string | undefined): Age {
   return (AGES as readonly string[]).includes(raw ?? '') ? (raw as Age) : 't3';
 }
 
+/** The configuration this bundle runs with, frozen at bootstrap. */
 export const config: Config = Object.freeze({
   apiBase: import.meta.env['VITE_API_BASE'] ?? '',
   source: readSource(import.meta.env['VITE_SOURCE']),

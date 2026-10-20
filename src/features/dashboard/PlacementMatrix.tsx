@@ -48,6 +48,9 @@ interface Cell {
   readonly coverage: number;
 }
 
+/**
+ * The pair matrix: duplicated token-hours by workload pair, fleet-wide, with the within-engine column.
+ */
 export function PlacementMatrix({
   placement,
   workload,
@@ -57,7 +60,7 @@ export function PlacementMatrix({
    * One workload, or absent for the whole fleet. Summing workloads into one cell is valid
    * arithmetic here and only here: the wire's `window_total` already states that `rows` and
    * `within_engine` disjointly partition the duplicated mass, so a token-hour sits under
-   * exactly one workload and a fleet cell adds nothing twice. The v3 ruling draws the matrix
+   * exactly one workload and a fleet cell adds nothing twice. The matrix is drawn
    * fleet-wide, independent of the copies panel's cut.
    */
   workload?: string;
@@ -79,7 +82,7 @@ export function PlacementMatrix({
     const prev = cells.get(key);
     cells.set(key, {
       hours: (prev?.hours ?? 0) + r.token_ms.value / HOUR_MS,
-      // Min rather than an average, per the ruled rule. Under an instance-grain basis these are
+      // Min rather than an average, by rule. Under an instance-grain basis these are
       // all equal so it is a no-op; it is written as the rule anyway so a finer basis degrades
       // to the weakest claim instead of silently averaging.
       coverage: Math.min(prev?.coverage ?? 1, r.token_ms.coverage),

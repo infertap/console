@@ -11,8 +11,10 @@ import {
   customSeed,
   grainOfBucket,
   markerFrac,
+  msToRangeInput,
   parseRangeInput,
   perDay,
+  rangeLabelOf,
   servedWindow,
   spanFracs,
   stopGrain,
@@ -110,6 +112,19 @@ describe('a served window is dressed from its bucket width', () => {
 });
 
 describe('a custom stop is a complete ask', () => {
+  it('round-trips the datetime-local form as a UTC instant', () => {
+    const at = Date.UTC(2026, 0, 2, 13, 7);
+    expect(parseRangeInput('2026-01-02T13:07')).toBe(at);
+    expect(parseRangeInput('2026-01-02')).toBe(Date.UTC(2026, 0, 2));
+    expect(msToRangeInput(at)).toBe('2026-01-02T13:07');
+  });
+
+  it('writes a same-day range as one date with a clock span, a longer one as a date pair', () => {
+    const t0 = Date.UTC(2026, 2, 10);
+    expect(rangeLabelOf(t0 + 13 * HOUR_MS, t0 + 16 * HOUR_MS)).toBe('03-10 13:00→16:00');
+    expect(rangeLabelOf(t0, t0 + 48 * HOUR_MS)).toBe('03-10→03-12');
+  });
+
   it('seeds both bounds from the window the panel was showing', () => {
     const w = servedWindow({ bucket_ms: HOUR_MS, start_ms: EDGE - 48 * HOUR_MS, end_ms: EDGE });
     expect(customSeed(w)).toEqual({ from: '2026-08-01T15:00', to: '2026-08-03T15:00' });
@@ -133,6 +148,17 @@ describe('markers on the window', () => {
   it('places an in-window instant as a fraction and refuses one outside', () => {
     expect(markerFrac(inside, w)).toBeCloseTo((inside - w.startMs) / w.spanMs);
     expect(markerFrac(w.startMs - MIN_MS, w)).toBeNull();
+  });
+
+  it('shades exactly one hour either side where the window allows it', () => {
+    const t0 = Date.UTC(2026, 2, 10);
+    const hourly = servedWindow({ bucket_ms: HOUR_MS, start_ms: t0, end_ms: t0 + 4 * HOUR_MS });
+    expect(spanFracs({ at_ms: t0 + 2 * HOUR_MS, breaks: false }, hourly)).toEqual({
+      b0: 0.25,
+      m: 0.5,
+      a1: 0.75,
+    });
+    expect(spanFracs(undefined, hourly)).toBeNull();
   });
 
   it('shades equal spans around a non-breaking marker, clamped to the window', () => {

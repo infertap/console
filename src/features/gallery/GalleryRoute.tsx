@@ -96,6 +96,7 @@ function Section({
   );
 }
 
+/** The gallery: every designed state of every component, for review in one place. */
 export default function GalleryRoute(): ReactNode {
   return (
     <main className={styles['page']}>

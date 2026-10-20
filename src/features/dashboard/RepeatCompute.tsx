@@ -34,8 +34,8 @@ import styles from './RepeatCompute.module.css';
 /**
  * Section 1: the repeat-compute meter, with the thrash lens as its face.
  *
- * **The anchor is one line**: fraction, total, coverage. The v3.1 ruling demoted the aggregate
- * to denominator and warrant, and the lens below is the meter face: the same mass, decomposed
+ * **The anchor is one line**: fraction, total, coverage. The aggregate is
+ * denominator and warrant, and the lens below is the meter face: the same mass, decomposed
  * by how long the block had been gone, over a window the operator picks. No verdict words and
  * no declared-threshold chip: the threshold family is deferred, and with no declared line there
  * is no honest fine/impaired verdict to render.
@@ -75,6 +75,7 @@ const CUT_DIMS: Readonly<Record<CutKey, string | null>> = {
 /** The instance cut's table is a top-N of the nodes the read returned, worst first. */
 const INSTANCE_CUT_TOP = 8;
 
+/** Section 1: the repeat-compute meter, the anchor line and the thrash lens as its face. */
 export function RepeatCompute({
   figures,
   markers,
@@ -185,8 +186,8 @@ function ThrashLens({ markers }: { markers: readonly MarkerJson[] }): ReactNode 
   const scenario: ScenarioKey = rawSc === 'reg' ? 'reg' : 'win';
   const dim = CUT_DIMS[cut];
 
-  // The bands read, in the wire's grammar. The panel stops travel as their own tokens since
-  // pin `eb511e6`: `14d`/`48h`/`3h` resolve through the SAME window resolver as the copies
+  // The bands read, in the wire's grammar. The panel stops travel as their own tokens:
+  // `14d`/`48h`/`3h` resolve through the SAME window resolver as the copies
   // read, against the producer's emission frontier, so this chart and the copies chart
   // cannot disagree about which three hours exist. A stop fixes its tier; a custom range
   // rides the absolute form and lets the server choose.

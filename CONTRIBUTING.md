@@ -1,7 +1,7 @@
 # Contributing
 
-How to build, test and land a change. `README.md` carries the laws every component obeys and
-the map of the tree; read it first if the words here are new.
+How to build, test and land a change. `README.md` maps the tree and `docs/design.md` carries
+the laws every component obeys; read those first if the words here are new.
 
 ## Build
 

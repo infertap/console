@@ -21,6 +21,7 @@ export const CLASS_LABELS: Record<string, string> = {
   indeterminate: 'unclassifiable',
 };
 
+/** The words on glass for a class, or the wire word where none is defined. */
 export function classLabel(cls: string): string {
   return CLASS_LABELS[cls] ?? cls;
 }
@@ -31,6 +32,7 @@ export const REGISTER_LABELS: Record<string, string> = {
   capacity: 'duplicate KV footprint',
 };
 
+/** The words on glass for a register. */
 export function registerLabel(register: string): string {
   return REGISTER_LABELS[register] ?? register;
 }
@@ -41,6 +43,9 @@ const METRIC_LABELS: Record<string, string> = {
   'fraction of stored mass': 'share of tokens stored',
 };
 
+/**
+ * The words on glass for a metric name, falling back to the class labels and then the wire word.
+ */
 export function metricLabel(metric: string): string {
   return METRIC_LABELS[metric] ?? CLASS_LABELS[metric] ?? metric;
 }
@@ -69,6 +74,7 @@ export const READ_FROM_LABELS: Record<string, string> = {
   ring: "from the holder's newest stores",
 };
 
+/** The words on glass for where a drill's rows came from. */
 export function readFromLabel(readFrom: string): string | null {
   return READ_FROM_LABELS[readFrom] ?? `read from ${readFrom}`;
 }

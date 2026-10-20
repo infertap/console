@@ -14,7 +14,7 @@ import styles from './Figure.module.css';
  * a reader has about any figure on this page are answered by the type system rather than by
  * whoever wrote the panel.
  *
- * The rule it enforces, from `read-api.md` §2.2: a number without its coverage is unrepresentable
+ * The rule it enforces: a number without its coverage is unrepresentable
  * in the Rust type, and nothing here may reconstruct one by pulling `.value` out and rendering it
  * alone. A lint blocks the other route, which is formatting a number outside the design system.
  *
@@ -24,13 +24,17 @@ import styles from './Figure.module.css';
  * - `figure.register` is the BOUND, always `>=`. Every figure this product states is a lower
  *   bound, because unobserved mass is not counted and is not estimated.
  * - the `register` prop is the ACCOUNTING register, recompute or capacity. They never share an
- *   axis and never share a hue family, so that dashboard §1.1's separation holds by construction.
+ *   axis and never share a hue family, so that the separation of the registers holds by construction.
  */
 
+/** The two registers a figure can belong to. They never share an axis or a hue. */
 export type AccountingRegister = 'recompute' | 'capacity';
+/** The size tier a figure renders at. */
 export type FigureTier = 'hero' | 'panel' | 'cell';
+/** How a figure's value is written. */
 export type FigureFormat = 'integer' | 'percent' | 'compact';
 
+/** A figure's inputs: the whole covered value, its unit, its register, and how to render it. */
 export interface FigureProps {
   /** The whole covered value. There is deliberately no way to pass a bare number. */
   value: CoveredFigure;
@@ -55,6 +59,9 @@ function boundGlyph(register: string): string {
   return register === '>=' ? '≥' : register;
 }
 
+/**
+ * A covered figure on the glass: the bound, the value, the unit, and the coverage with its basis.
+ */
 export function Figure({
   value,
   unit,
@@ -90,6 +97,9 @@ export function Figure({
   );
 }
 
+/**
+ * The designed absence's inputs: why there is no number, the unit it will carry, and the register.
+ */
 export interface UnmeasuredProps {
   /** Why there is no number. Never `fine`, which would be a contradiction. */
   state: Exclude<HonestState, 'fine'>;

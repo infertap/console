@@ -63,6 +63,9 @@ export interface FixtureOptions {
   readonly passEveryMs?: number;
 }
 
+/**
+ * The data source over the scripted corpus: every read answered from the world, every response contract-shaped.
+ */
 export class FixtureDataSource implements DataSource {
   readonly kind = 'fixture' as const;
 

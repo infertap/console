@@ -10,11 +10,13 @@ import { matchRoute, type Match } from './routes';
  * here is the part only the composition root may know, which is what the whole route table is.
  */
 
+/** The route the current address matches, with its parameters, or null for no route. */
 export function useMatch(): Match | null {
   const { pathname } = useLocation();
   return useMemo(() => matchRoute(pathname), [pathname]);
 }
 
+/** Renders the matched route's component, or `fallback` where no route matches. */
 export function Outlet({ fallback }: { fallback: ReactNode }): ReactNode {
   const match = useMatch();
   const { pathname } = useLocation();

@@ -14,6 +14,7 @@ import styles from './Entity.module.css';
  * CDF, a linear interpolation between two served quantiles, said as such by the caller).
  */
 
+/** One line of a chart hover: an optional swatch, a label and the served value. */
 export interface TipLine {
   /** The series' own tone, as the legend draws it. Absent renders no swatch. */
   readonly swatch?: string;

@@ -10,6 +10,7 @@ import { navigate, type RouteProps } from '../../design-system/navigation/router
  * its instance, the one containment the model guarantees.
  */
 
+/** The retired holders ranking's address, sent to the fleet page. */
 export function HoldersRedirect(_props: RouteProps): ReactNode {
   useEffect(() => {
     navigate('/fleet', { replace: true });
@@ -17,6 +18,7 @@ export function HoldersRedirect(_props: RouteProps): ReactNode {
   return null;
 }
 
+/** The rank drill's old spelling, sent to its home under the instance page. */
 export function HolderRedirect({ params }: RouteProps): ReactNode {
   const instance = params['instance'] ?? '';
   const dp = params['dp_rank'] ?? '0';

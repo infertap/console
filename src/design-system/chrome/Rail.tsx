@@ -10,12 +10,11 @@ import styles from './Chrome.module.css';
  * addressable URL would stop being navigation and start being a sitemap. The active item is
  * marked with an accent indicator rather than a second dark surface.
  *
- * **There is no Reports destination.** `/v1/reports` was sidelined by ruling on 2026-08-04: the
- * route is not reserved and not refusing, it does not exist. A rail entry pointing at a surface
- * the API has no answer for is a promise this product cannot keep, and the mock's entry predates
- * that ruling.
+ * **There is no Reports destination.** The API has no `/v1/reports` route, and a rail entry
+ * pointing at a surface the API has no answer for is a promise this product cannot keep.
  */
 
+/** One rail entry: where it goes, its label, its glyph, and the drill pages it owns. */
 export interface Destination {
   readonly to: string;
   readonly label: string;
@@ -24,6 +23,7 @@ export interface Destination {
   readonly owns?: readonly string[];
 }
 
+/** The rail's destinations, in order. Destinations, never sections. */
 export const DESTINATIONS: readonly { group: string | null; items: readonly Destination[] }[] = [
   {
     group: null,
@@ -46,7 +46,7 @@ export const DESTINATIONS: readonly { group: string | null; items: readonly Dest
       { to: '/health', label: 'Health', glyph: '◑' },
     ],
   },
-  // The rail holds only v3 destinations (v3 ruling): retired surfaces leave it rather than
+  // The rail holds only current destinations: retired surfaces leave it rather than
   // linking backward. `/about` stays addressable; a rail entry is a promise of a daily
   // destination and about is not one.
 ];
@@ -56,6 +56,7 @@ function isCurrent(pathname: string, item: Destination): boolean {
   return pathname === item.to || (item.owns ?? []).some((p) => pathname.startsWith(p));
 }
 
+/** The left rail: the destinations, the active one lit, collapsible to glyphs. */
 export function Rail(): ReactNode {
   const { pathname } = useLocation();
   const [collapsed, setCollapsed] = useState(false);

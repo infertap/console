@@ -22,6 +22,7 @@ import {
  * too (`AUTO_GRAIN_MINUTE_POINT_BUDGET` 240, `AUTO_GRAIN_HOUR_POINT_BUDGET` 200).
  */
 export const MINUTE_RETENTION_DAYS = 2;
+/** How far back the hourly tables reach. */
 export const HOURLY_RETENTION_DAYS = 365;
 const MINUTE_POINT_BUDGET = 240;
 const HOUR_POINT_BUDGET = 200;
@@ -85,8 +86,7 @@ export function presetWindow(key: '14d' | '48h' | '3h', edgeMs: number): WindowD
       rangeLabel: '48 h',
     };
   }
-  // The 3 h stop serves at minute grain since the copies read joined the one vocabulary
-  // (analyzer landing 2): 180 whole minutes through the current one, never `5min`.
+  // The 3 h stop serves at minute grain: 180 whole minutes through the current one, never `5min`.
   return {
     key,
     label: '3 h',

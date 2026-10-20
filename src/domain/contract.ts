@@ -121,7 +121,7 @@ export type StampData = S['StampData'];
 /**
  * The `data:` payload of each frame kind.
  *
- * In the contract as of pin `13a50c8`. The frame grammar itself stays prose because OpenAPI
+ * In the contract. The frame grammar itself stays prose because OpenAPI
  * cannot describe one, but the payloads are the part with fields to rename, so these are
  * generated and the canary watches them like everything else.
  */
@@ -135,8 +135,7 @@ export type ResyncEvent = S['ResyncEvent'];
  * An in-band refusal: a bounded question the meter declines to answer, returned with a 200
  * because a refusal is a result rather than a failure.
  *
- * Carries the closed cause set and a `bound`, as of pin `13a50c8`. Both were absent when this
- * console first read the contract, and `<Refusal>` is a designed render over the cause set, so
+ * Carries the closed cause set and a `bound`. `<Refusal>` is a designed render over the cause set, so
  * the component is typed against the enum directly and a cause the analyzer adds is a compile
  * error here rather than a blank chip.
  *

@@ -5,17 +5,19 @@ import styles from './AnchorLine.module.css';
 /**
  * The anchor line: the whole scalar story in one row.
  *
- * The v3.1 ruling demoted the aggregate to what it structurally is, denominator and warrant:
+ * The aggregate is what it structurally is, denominator and warrant:
  * one fraction with its denominator, then the labelled facts that qualify it. The lens below
  * such a line is the meter face; this is not a second verdict and carries no state word.
  */
 
+/** One labelled fact beside the anchor's fraction. */
 export interface AnchorItem {
   readonly label: string;
   readonly value: string;
   readonly tip?: string;
 }
 
+/** The anchor line: the headline fraction with its denominator, then the facts that qualify it. */
 export function AnchorLine({
   headline,
   unit,

@@ -32,7 +32,7 @@ body:
     id: expected
     attributes:
       label: What you expected
-      description: What `README.md`'s laws, the panel's definition hover, or the analyzer's contract says should have rendered.
+      description: What `docs/design.md`'s laws, the panel's definition hover, or the analyzer's contract says should have rendered.
     validations:
       required: true
   - type: textarea

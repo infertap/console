@@ -5,11 +5,12 @@ import styles from './KpiRow.module.css';
 /**
  * The gauge row: KPI tiles, numbers first.
  *
- * The v3.1 ruling is numbers-only glass: the tiles carry the story, words survive as labels and
+ * Numbers-only glass: the tiles carry the story, words survive as labels and
  * hover definitions. A tile's `tip` is where a figure's base rate or its plain-words caveat
  * rides, because a percent without its base is half a claim and the base does not earn glass.
  */
 
+/** One tile: a value, its label, an optional width and hover tip. */
 export interface Kpi {
   readonly value: string;
   readonly label: string;
@@ -18,6 +19,7 @@ export interface Kpi {
   readonly tip?: string;
 }
 
+/** A row of KPI tiles, numbers first, words as labels and hover definitions. */
 export function KpiRow({ kpis }: { kpis: readonly Kpi[] }): ReactNode {
   return (
     <div className={styles['row']}>

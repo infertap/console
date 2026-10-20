@@ -15,9 +15,8 @@ import styles from './Health.module.css';
 /**
  * Level 1: Health, where a nonzero trust chip gets investigated.
  *
- * The v3 surgery, per the ruling set and the product's own history: model identity is DECLARED,
- * never probed (the probe was retracted); no recovery section, because gauges for deleted
- * machinery lie; and the two tables this page exists for lead it: the delivery ledger (of what
+ * Model identity is DECLARED, never probed; there is no recovery section, because gauges for
+ * machinery the analyzer no longer has would lie; and the two tables this page exists for lead it: the delivery ledger (of what
  * the taps produced, what arrived, per process) and the staleness investigation (who is quiet,
  * last heard, judged against each process's own threshold).
  */
@@ -25,8 +24,8 @@ export default function HealthRoute(_props: RouteProps): ReactNode {
   const health = useResource('health:page', (ds) => ds.health({}));
   const delivery = useResource('delivery:page', (ds) => ds.delivery());
   const roster = useResource('roster:page', (ds) => ds.roster({}));
-  // Both bases ride the instance coverage rows since pin `2d0db9e`, with the sums that make
-  // the token-weighted one mergeable. The client-side join this replaced is deleted.
+  // Both bases ride the instance coverage rows, with the sums that make the token-weighted
+  // one mergeable.
   const coverage = useResource('coverage:instance', (ds) => ds.coverage({ by: 'instance' }));
 
   return (
@@ -257,7 +256,7 @@ export default function HealthRoute(_props: RouteProps): ReactNode {
         </Section>
       )}
 
-      {/* ── 4 · Model identity: declared, per the standing ruling ────────────────────────── */}
+      {/* ── 4 · Model identity: declared ────────────────────────── */}
       {health.status === 'ready' && (
         <Section name="Model identity" id="model" definition="model_identity">
           <Block

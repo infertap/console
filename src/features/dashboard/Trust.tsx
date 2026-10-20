@@ -14,7 +14,7 @@ import styles from './Trust.module.css';
 /**
  * Section 3: trust, compact. **The warrant, not a value panel.**
  *
- * The v3 ruling shrank this to the question it answers: was the instrument looking, and how
+ * This answers one question: was the instrument looking, and how
  * much of it is reporting now. The tile is INSTANCE-TIME coverage, deliberately not
  * token-weighted: the token-weighted figure already renders once, on the anchor line beside the
  * mass it qualifies, and a second render would be the de-duplication rule broken at the exact
@@ -45,6 +45,7 @@ const MEANING: Readonly<Record<string, string>> = {
   ungraded: 'never declared',
 };
 
+/** Section 3: was the instrument looking, and how much of it is reporting now. */
 export function TrustSection({
   coverage,
   roster,

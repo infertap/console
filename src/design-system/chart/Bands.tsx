@@ -13,6 +13,7 @@ import styles from './Bands.module.css';
  * the same shape at table density, one per cut member.
  */
 
+/** The bands' summary row: each band's swatch and label, with its hover title. */
 export function BandLegend({
   bands,
   titles,
@@ -37,6 +38,7 @@ export function BandLegend({
   );
 }
 
+/** One cut member's share composition as a single labelled strip. */
 export function CompositionBar({
   label,
   shares,

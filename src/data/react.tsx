@@ -58,6 +58,7 @@ interface DataContextValue {
 
 const DataContext = createContext<DataContextValue | null>(null);
 
+/** Puts one data source and its revision in context: the only way a component reaches the seam. */
 export function DataProvider({
   source,
   children,
@@ -150,10 +151,14 @@ function useData(): DataContextValue {
   return value;
 }
 
+/** The data source in context. */
 export function useDataSource(): DataSource {
   return useData().source;
 }
 
+/**
+ * The last ingest batch event and a counter that moves with each one, for the status strip's bursts.
+ */
 export function useIngestPulse(): {
   last: IngestBatchEvent | null;
   pulse: number;
@@ -199,6 +204,9 @@ function asApiError(error: unknown): ApiError {
   return new ApiError(0, undefined, error instanceof Error ? error.message : 'read failed');
 }
 
+/**
+ * One read, keyed, re-run when the tick moves: loading, ready with its value, or failed with its error.
+ */
 export function useResource<T>(key: string, load: (source: DataSource) => Promise<T>): Resource<T> {
   const { source, revision, notifyUnauthenticated } = useData();
   /** What this result is a result OF. A read is a claim about one key at one revision. */
