@@ -4,8 +4,8 @@ This file is for any AI coding agent working in this repository. It is short on 
 the rules are in `CONTRIBUTING.md`, and they apply to an agent exactly as they apply to a
 person.
 
-- Read `CONTRIBUTING.md` first, then the laws in `README.md`. Every component obeys them,
-  and the lint rules enforce most of them; `docs/gates.md` says which.
+- Read `CONTRIBUTING.md` first, then the laws in `docs/design.md`. Every component obeys
+  them, and the lint rules enforce most of them; `docs/gates.md` says which.
 - One task per commit. Run `npm run typecheck`, `npm run lint`, `npm test` and
   `npm run build` before a push; CI runs the same and more, and its verdict is read after
   every push.

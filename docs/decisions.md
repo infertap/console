@@ -10,13 +10,13 @@ a later reader can tell whether the reason still holds.
 **Decided: `openapi-typescript` as a dev dependency, a hand-rolled transport over the generated
 types, and a scheduled canary in this repo.**
 
-`read-api.md` §8.4 framed a choice between typed-struct-grade schemas and generate-from-the-
-hand-written-block plus a parity test. **That question was already answered upstream** on
-2026-08-04, the same day it was written down: `utoipa` landed, the schemas derive from the wire
+The analyzer's read API document framed a choice between typed-struct-grade schemas and
+generate-from-the-hand-written-block plus a parity test. **That question was answered upstream**
+before this repo existed: `utoipa` landed, the schemas derive from the wire
 types, and `$ref` targets read off `ToSchema` so renaming a wire struct moves the reference with
 it. There was nothing left for this session to pick.
 
-What this session actually inherited was §8.4.1: **where the generation check runs.** Three
+What this repo inherited was the next question: **where the generation check runs.** Three
 mechanisms, and knowing which one guards which property is worth more than an extra job added
 for the feeling of coverage:
 
@@ -73,7 +73,7 @@ repository, and not necessarily before that.
 **Decided: a generator in this repo, emitting contract-shaped envelopes, validated against the
 committed spec.**
 
-The brief called for "the corpus golden bytes." Those do not exist as bytes.
+The first ask was "the corpus golden bytes." Those do not exist as bytes.
 `crates/api/tests/goldens.rs` asserts in-process against a live pass over three store records and
 one batch; nothing is written to disk, and this repo does not edit the analyzer. Even dumped,
 that dataset renders no 90-day trend, no 468 holders, no three seams and no four ages.
@@ -87,10 +87,9 @@ Three things do:
 
 1. **`test/fixture-parity.test.ts`** validates every response against `contract/openapi.json`'s
    own schemas, resolved by JSON Pointer into the document so the `$ref`s resolve against the
-   contract as published. This is the compensating mechanism §2.2.1 named and declined to build,
-   because before per-path schemas existed it would have passed trivially and read as coverage.
-   It does not pass trivially now: **it caught a malformed stamp on its first run** and that
-   became contract finding 10.
+   contract as published. Before per-path schemas existed this would have passed trivially and
+   read as coverage. It does not pass trivially now: **it caught a malformed stamp on its first
+   run**, which the analyzer then fixed.
 2. **`src/data/fixture/world.test.ts`** promotes the mock's invariants from a computed footer to
    assertions. Later plus earlier equals the full window, the classes sum to their total, all 468
    holders sum to the fleet figure, every seam's date derives from its day index.
@@ -127,7 +126,7 @@ in `deps.md` is build-time.
 
 ## 4. The chart layer: the mock's SVG, ported
 
-**Decided over uPlot, which the brief had pre-selected as "the one earned heavyweight."**
+**Decided over uPlot, the one heavyweight dependency that had been on the table.**
 
 The mock's trend is about 150 lines of hand-drawn SVG, and every feature of it is a law rather
 than a chart option: hatched unexamined regions that never render as zero, a coverage ribbon
@@ -141,8 +140,8 @@ The volume argument does not hold either: the trend is 90 points, the holders ta
 hundreds of rows, and uPlot earns its place at a hundred thousand points with live streaming.
 
 **The trigger that reopens this, so it is a decision and not inertia:** a series past roughly
-2000 points, or live streaming at event grain. Both are named in `docs/dashboard.md` §10 as
-measurements owed before any finer rollup exists, so neither can arrive by surprise. The chart
+2000 points, or live streaming at event grain. Both are measurements the analyzer owes before
+any finer rollup exists, so neither can arrive by surprise. The chart
 lives behind one module so the swap stays contained.
 
 ---
@@ -189,8 +188,7 @@ and slightly wrong version is expensive.
 
 **What ships, and is not placeholder:**
 
-- The token posts as a JSON body, per the contract, not the bearer header `read-api.md` §6.3
-  still documents.
+- The token posts as a JSON body, per the contract, not a bearer header.
 - Nothing stores the token. The cookie is `HttpOnly`, so this code cannot read it by design and
   can only discover the session is gone when a 401 arrives.
 - **Session loss is an app-level state.** A panel can honestly say a figure is past the raw

@@ -58,7 +58,7 @@ analyzer fixes that, **this test goes red**, which is the signal to delete the w
 
 The spec's own schemas validate every fixture response, resolved by JSON Pointer into the
 document so the `$ref`s resolve against the contract as published rather than against a lifted
-fragment. It caught a malformed stamp on its first run, which became contract finding 10.
+fragment. It caught a malformed stamp on its first run, which the analyzer then fixed.
 
 The paging path is walked to exhaustion at `limit = 1`, and a cursor minted under one pass is
 asserted to be refused against another. At the v1 envelope one page holds the table, so this is
@@ -117,7 +117,7 @@ green. The next cheapest is to look at the canary's last successful run whenever
 since a pin bump is exactly when its silence would matter. The real fix, if this repo ever goes
 quiet for long stretches, is to trigger the canary from somewhere that does not sleep — the
 analyzer's CI on a contract change, or any scheduler outside GitHub — which trades the clean
-toolchain-locality argument in `docs/decisions.md` §1 for a check that cannot be switched off by
+toolchain-locality argument in decision 1 of `docs/decisions.md` for a check that cannot be switched off by
 inactivity. That is a real trade and it should be made deliberately rather than discovered.
 
 ## Owed
@@ -128,7 +128,7 @@ basis, an unmeasured position contains no digits. It would catch a cause dropped
 catalogue or a figure rendered without provenance.
 
 It would **not** catch the unexamined hatch becoming a solid fill, because that is CSS and jsdom
-does not apply it. That regression is exactly the one the brief names as a defect, so the check
+does not apply it. That regression is the one that matters most, so the check
 that matters here is a real browser rendering the gallery and diffing the image.
 
 The reason it is not in yet is a genuine tension rather than an oversight: a browser-based runner

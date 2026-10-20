@@ -17,7 +17,7 @@ body:
     id: proposal
     attributes:
       label: The proposal
-      description: What the console should show or do. If it is a figure, say which contract field it reads and which law in `README.md` governs how it renders.
+      description: What the console should show or do. If it is a figure, say which contract field it reads and which law in `docs/design.md` governs how it renders.
     validations:
       required: true
   - type: textarea
