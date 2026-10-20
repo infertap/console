@@ -28,13 +28,6 @@ export function percent(fraction: number, decimals = 1): string {
 }
 
 /**
- * A large count, shortened.
- *
- * For the odometer and the status strip, where the exact digit is not the point and the width
- * is. Never for an accounting figure: a token mass renders in full, because rounding a lower
- * bound upward would state something the meter did not measure.
- */
-/**
  * A multiplier, as in copies per cached token.
  *
  * Here rather than at the call site because the law is that a number formatted outside the design
@@ -46,6 +39,13 @@ export function multiplier(value: number): string {
   return `${value.toFixed(2)}\u00d7`;
 }
 
+/**
+ * A large count, shortened.
+ *
+ * For the odometer and the status strip, where the exact digit is not the point and the width
+ * is. Never for an accounting figure: a token mass renders in full, because rounding a lower
+ * bound upward would state something the meter did not measure.
+ */
 export function compact(value: number): string {
   if (value >= 1e9) return `${(value / 1e9).toFixed(2)}B`;
   if (value >= 1e6) return `${(value / 1e6).toFixed(2)}M`;
