@@ -20,7 +20,7 @@ import table from '../../design-system/table/Table.module.css';
 export default function BlockRoute({ params }: RouteProps): ReactNode {
   const id = params['id'] ?? '';
   const block = useResource(`block:${id}`, (ds) => ds.blockHolders(id, { limit: 30 }));
-  // Where the rows came from (grain ladder §4.9): a request that left the box took seconds,
+  // Where the rows came from: a request that left the box took seconds,
   // and the stamp says so; the box answering from its own partitions says nothing.
   const origin = block.status === 'ready' ? readFromLabel(block.value.data.read_from) : null;
 

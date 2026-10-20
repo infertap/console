@@ -5,7 +5,7 @@ import type { DefinitionKey } from '../info/definitions';
 import styles from './Block.module.css';
 
 /**
- * The v3 section structure: **the heading lives on the canvas; beneath it, one or more
+ * The section structure: **the heading lives on the canvas; beneath it, one or more
  * independent plates.** A section is a group, not a box, so independent content gets an
  * independent block, and a control lives in the head of the one block it changes.
  */
@@ -39,7 +39,7 @@ export function Section({
 }
 
 /**
- * One plate. The head states what this card shows, at what scope; the v3 role-head ruling puts
+ * One plate. The head states what this card shows, at what scope; the head puts
  * the ROLE in plain words on glass and the method name in the hover title, so `head` reads like
  * "how soon it comes back · fleet · 14 d" and `extras` carries the info hover.
  */

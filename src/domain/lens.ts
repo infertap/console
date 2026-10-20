@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 /**
- * The lens vocabulary: the v3 metric panels' shared cut and band words, and the shapes still
+ * The lens vocabulary: the metric panels' shared cut and band words, and the shapes still
  * waiting on the analyzer.
  *
  * Most of what lived here has graduated: the thrash bands, the copies histogram and the

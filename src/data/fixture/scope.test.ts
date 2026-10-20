@@ -7,7 +7,7 @@ import { AGE_SCRIPT, DEPLOYS, HOLDERS, WASTE_FULL } from './world';
 const T3 = AGE_SCRIPT.t3;
 
 /**
- * Scope beside dims (pin `eb511e6`): scope says which slice to answer about, dims says how to
+ * Scope beside dims: scope says which slice to answer about, dims says how to
  * group inside it. These check the corpus keeps the wire's grammar: holder wins by being
  * narrower, a malformed holder is a 404, an unmatched value is looked-and-found-nothing, and
  * a scoped read costs one slice rather than a fleet regrouped.
@@ -28,7 +28,7 @@ describe('scoped figures', () => {
   });
 
   it('an instance or holder scope at minute grain answers 180 buckets and states the tier', () => {
-    // The rank-grain minute cells (landing 7): the 3 h stop under either scope, minute wide.
+    // The rank-grain minute cells: the 3 h stop under either scope, minute wide.
     for (const scope of [{ instance: 'i-003' }, { holder: 'i-003/0/0' }]) {
       const d = figuresFor(T3, { window: '3h', grain: 'minute', dims: ['class'], ...scope });
       expect(d.grain).toBe('minute');

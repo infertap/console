@@ -48,7 +48,7 @@ export default function FleetRoute(_props: RouteProps): ReactNode {
 }
 
 /** The workloads, as chips with their rates: the middle facet's doors. Collapses to a
- * sentence where the fleet carries one, per the single-workload ruling. */
+ * sentence where the fleet carries one. */
 function WorkloadStrip({ workloads }: { workloads: Resource<Stamped<FiguresData>> }): ReactNode {
   const head = `workloads · ${stopLabel(DEFAULT_WINDOW)}`;
   const hover = <InfoHover of="entity_scope" label="scope" />;

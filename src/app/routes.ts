@@ -15,9 +15,9 @@ import type { RouteProps } from '../design-system/navigation/router';
  * feature boundaries the lint already enforces, which means the bundle graph and the
  * architecture cannot drift apart.
  *
- * **There is no `/reports`.** `/v1/reports` was sidelined by ruling on 2026-08-04: the route is
- * not reserved and not refusing, it does not exist. A rail entry pointing at a surface the API
- * has no answer for is a promise this product cannot keep.
+ * **There is no `/reports`.** The API has no such route, so the console has no such destination:
+ * a rail entry pointing at a surface the API has no answer for is a promise this product cannot
+ * keep.
  */
 
 export interface RouteDef {

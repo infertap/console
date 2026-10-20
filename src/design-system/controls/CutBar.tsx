@@ -10,7 +10,7 @@ import styles from './CutBar.module.css';
  * this component never reaches for shared state; the owning panel passes state down and receives
  * the pick back, and URL is state at that layer.
  *
- * Per the v3.1 affordance rule, a box is something you can press: the segmented group keeps its
+ * A box is something you can press: the segmented group keeps its
  * box and responds on hover, which is what separates it from a label.
  */
 

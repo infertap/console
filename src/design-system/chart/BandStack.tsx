@@ -8,7 +8,7 @@ import styles from './BandStack.module.css';
 /**
  * The banded time series: mass per bucket, stacked by a fixed band vocabulary.
  *
- * This is the v3 chart grammar for both metric surfaces: the thrash lens stacks repeat-compute
+ * This is the chart grammar for both metric surfaces: the thrash lens stacks repeat-compute
  * mass by time-since-eviction band, and the copies chart stacks duplicated token-hours by
  * simultaneous copy count. Fixed bands, mass integrated per band per bucket: sums, so any cut
  * and any window merge exactly, and the figure compares fleet to fleet.

@@ -38,7 +38,7 @@ import styles from './Entity.module.css';
  * records one link beneath. It draws no conclusion about why.
  *
  * **One window rules the page**, the entity stops. At the 3 h stop the reads serve from the
- * rank-grain minute cells (landing 7), where a holder IS a rank: the cache group rolls up, and
+ * rank-grain minute cells, where a holder IS a rank: the cache group rolls up, and
  * the headline says so at that stop rather than letting the address above claim a group the
  * minute cells do not keep.
  */
@@ -54,10 +54,10 @@ export default function RankRoute({ params }: RouteProps): ReactNode {
 
   const [rawWin, setWin] = useQueryParam('win');
   // The entity stops, from the one stop list (`domain/windows.ts`): a holder scope serves at
-  // minute from the rank-grain cells (landing 7), so the page zooms like the instance page.
+  // minute from the rank-grain cells, so the page zooms like the instance page.
   const win = windowKey(rawWin, ENTITY_STOPS) as '14d' | '48h' | '3h';
   const winLabel = stopLabel(win);
-  // One grammar, one anchor (landing 2): every read takes the stop itself.
+  // One grammar, one anchor: every read takes the stop itself.
   const grain = stopGrain(win);
   const relWindow = win;
 
@@ -240,7 +240,7 @@ function TimelineBlock({
 }): ReactNode {
   if (timeline.status !== 'ready') return null;
   const rows = timeline.value.data.rows ?? [];
-  // Where the rows came from (grain ladder §4.9): the newest events are the box's own, and a
+  // Where the rows came from: the newest events are the box's own, and a
   // pulse that had to reach the bucket says so, the way the headline says which cells it read.
   const origin = readFromLabel(timeline.value.data.read_from);
   return (

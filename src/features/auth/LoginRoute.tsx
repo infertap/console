@@ -14,13 +14,13 @@ import styles from './Login.module.css';
  *
  * **Placeholder, and recorded as one.** There is no login in the mock: nine pages, none of them
  * auth. Every other surface in this console is a port of a reviewed design, and this one would
- * be invention, so it is deliberately plain until its own design pass. `docs/decisions.md` §7
+ * be invention, so it is deliberately plain until its own design pass. Decision 7 in `docs/decisions.md`
  * carries the reason and what that pass has to answer.
  *
  * The mechanism underneath it is settled, though, and is not placeholder:
  *
  * - The token posts as a JSON body, not a bearer header. The contract is generated from the
- *   handlers and declares a body; `read-api.md` §6.3 still shows bearer, and the contract wins.
+ *   handlers and declares a body, and the contract is what this code follows.
  * - This code stores nothing. Success sets an `HttpOnly` cookie it cannot read by design: it can
  *   only ever discover the session is gone when a 401 arrives.
  * - **Signing in does not navigate.** The shell renders this in place while the address stays
@@ -35,8 +35,8 @@ import styles from './Login.module.css';
  * username field gives the manager something to key on, because a lone password input with no
  * username is what managers associate unreliably.
  *
- * The readonly account field is not decoration. Viewer is the only role the API has
- * (`read-api.md` §6.2), so naming it states the product rather than inventing a choice.
+ * The readonly account field is not decoration. Viewer is the only role the API has, so
+ * naming it states the product rather than inventing a choice.
  */
 /**
  * The one role. Fixed, because the API has exactly one and a field the operator can edit would

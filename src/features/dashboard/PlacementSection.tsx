@@ -207,7 +207,7 @@ function CopiesPanel({
   const { win } = pw;
   const scenario: ScenarioKey = rawSc === 'reg' ? 'reg' : 'win';
 
-  // One grammar and one grain vocabulary (landing 2): the same window and the same explicit
+  // One grammar and one grain vocabulary: the same window and the same explicit
   // tier per stop as the thrash lens asks, so the two charts on this page draw the same
   // buckets over the same hours. A custom range lets the server choose and states why.
   const copies = useResource(`replication:${rawSel ?? ''}:${pw.ask}`, (ds) =>

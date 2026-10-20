@@ -59,7 +59,7 @@ export default function WorkloadRoute({ params }: RouteProps): ReactNode {
   const win = windowKey(rawWin, ENTITY_STOPS) as '14d' | '48h' | '3h';
   const winLabel = stopLabel(win);
   const grain = stopGrain(win);
-  // One grammar, one anchor (landing 2): every read takes the stop itself.
+  // One grammar, one anchor: every read takes the stop itself.
   const relWindow = win;
   const bandsAsk = { window: win, grain } as const;
 
@@ -71,7 +71,7 @@ export default function WorkloadRoute({ params }: RouteProps): ReactNode {
     ds.figures({ window: relWindow, grain, dims: ['class'] }),
   );
   // The members and the peers: the same read one entity dim over. The instance cut serves at
-  // minute from the rank-grain cells (landing 7), so the members read takes the page's grain
+  // minute from the rank-grain cells, so the members read takes the page's grain
   // like every other read here.
   const members = useResource(`wl:${id}:members:${win}`, (ds) =>
     ds.figures({ window: relWindow, grain, dims: ['instance', 'class'], workload: id }),

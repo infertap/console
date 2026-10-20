@@ -147,10 +147,10 @@ export default function InstanceRoute({ params }: RouteProps): ReactNode {
   const id = params['id'] ?? '';
   const [rawWin, setWin] = useQueryParam('win');
   // The entity stops, from the one stop list (`domain/windows.ts`): an instance scope serves
-  // at minute from the rank-grain cells (landing 7), so the page zooms like the dashboard.
+  // at minute from the rank-grain cells, so the page zooms like the dashboard.
   const win = windowKey(rawWin, ENTITY_STOPS) as '14d' | '48h' | '3h';
   const winLabel = stopLabel(win);
-  // One grammar, one anchor (landing 2): every read takes the stop itself.
+  // One grammar, one anchor: every read takes the stop itself.
   const grain = stopGrain(win);
   const relWindow = win;
   const bandsAsk = { window: win, grain } as const;
@@ -178,7 +178,7 @@ export default function InstanceRoute({ params }: RouteProps): ReactNode {
   const ranks = useResource(`inst:${id}:ranks:${win}`, (ds) =>
     ds.figureBands({ window: relWindow, grain: ranksGrain, instance: id, dims: 'holder' }),
   );
-  // The duplication read serves two grains (landing 10): the minute cut inside the minute
+  // The duplication read serves two grains: the minute cut inside the minute
   // tier's reach, the hourly cut otherwise. The 3 h stop asks minute; the two longer stops
   // ask hour, and the 14 d stop sums those hours into days before drawing. An explicit ask
   // is honored verbatim or refused by name, never quietly downgraded.
@@ -648,7 +648,7 @@ function RanksBlock({
  * single-group node drew every bar at 100% and stated the duplication's character while
  * saying nothing about its size. The one action lives in the i hover.
  *
- * The bars take their width from the response's own `bucket_ms` (analyzer landing 10):
+ * The bars take their width from the response's own `bucket_ms`:
  * minute-wide at the 3 h stop from the minute cut, hour-wide at 48 h, and at 14 d the hours
  * summed into days. The head states the width drawn, the way the other panels do.
  */

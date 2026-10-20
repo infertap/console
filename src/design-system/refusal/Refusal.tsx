@@ -7,7 +7,7 @@ import styles from './Refusal.module.css';
 /**
  * A refusal, rendered as the result it is.
  *
- * `read-api.md` §7.2 rules that a well-formed request whose answer a data bound prevents returns
+ * The read API's contract says a well-formed request whose answer a data bound prevents returns
  * **200 with `data.refused`**, not an error status: "no event grain past 14 days" is a fact about
  * the meter. So this is not an error component. It occupies the position the answer would have
  * occupied, says what the meter declines to state, and states the bound that produced it.

@@ -10,10 +10,8 @@ import styles from './Chrome.module.css';
  * addressable URL would stop being navigation and start being a sitemap. The active item is
  * marked with an accent indicator rather than a second dark surface.
  *
- * **There is no Reports destination.** `/v1/reports` was sidelined by ruling on 2026-08-04: the
- * route is not reserved and not refusing, it does not exist. A rail entry pointing at a surface
- * the API has no answer for is a promise this product cannot keep, and the mock's entry predates
- * that ruling.
+ * **There is no Reports destination.** The API has no `/v1/reports` route, and a rail entry
+ * pointing at a surface the API has no answer for is a promise this product cannot keep.
  */
 
 export interface Destination {
@@ -46,7 +44,7 @@ export const DESTINATIONS: readonly { group: string | null; items: readonly Dest
       { to: '/health', label: 'Health', glyph: '◑' },
     ],
   },
-  // The rail holds only v3 destinations (v3 ruling): retired surfaces leave it rather than
+  // The rail holds only current destinations: retired surfaces leave it rather than
   // linking backward. `/about` stays addressable; a rail entry is a promise of a daily
   // destination and about is not one.
 ];

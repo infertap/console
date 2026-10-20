@@ -2,8 +2,7 @@
 /**
  * The replication corpus: cached token-hours held in more than one place at once.
  *
- * **Contract-shaped since pin `2d0db9e`**: `/v1/residual/replication` landed speaking the
- * panel's window tongue, with the four copy bands as named fields, the members table
+ * **Contract-shaped**: `/v1/residual/replication` speaks the panel's window tongue, with the four copy bands as named fields, the members table
  * fleet-first, the remedy split, and the exact mean-copies pair. This corpus renders those
  * bytes; `test/fixture-parity.test.ts` validates them against the committed contract.
  *
@@ -42,7 +41,7 @@ export const CACHED_TH_DAY = 250_600;
 export const MEAN_COPIES = 1.06;
 export const CROSS_ENGINE_SHARE = 0.71;
 /**
- * The third remedy bucket's share (pin `eb511e6`): duplicated mass that exists only because a
+ * The third remedy bucket's share: duplicated mass that exists only because a
  * hybrid model splits its layers into separate KV cache groups. Architecture, never waste; the
  * corpus scripts a hybrid minority so the state renders. Within-engine gets the remainder.
  */
@@ -246,7 +245,7 @@ function hash01(seed: number, at: number): number {
  * halves sum to the fleet remedy buckets: one world, never authored twice. An instance the
  * corpus has never seen returns empty rows, which is a MEASURED zero.
  *
- * **Two grains, one producer (analyzer landing 10).** The minute cell is the unit: each
+ * **Two grains, one producer.** The minute cell is the unit: each
  * minute's mass is a function of its own instant, and an hour row is its sixty minutes
  * summed, so the same ask served at minute and at hour agree to the token, the law the
  * analyzer pins (`instance_tiers_agree`). An explicit `minute` or `hour` is honored verbatim;
@@ -330,7 +329,7 @@ export function instanceDuplicationResponse(
     within_ranks_token_ms: within,
     cache_groups_token_ms: group,
     copies_token_ms: copies,
-    // The denominator (pin `baa6795`): ALL token-time this node held over the window,
+    // The denominator: ALL token-time this node held over the window,
     // held-once included, so within/held is the ratified fraction. The node's held mass
     // takes the STORED_SHARES shape: cache work spreads with traffic, not with the
     // recompute power law, which is what lets busy and wasteful separate here too.

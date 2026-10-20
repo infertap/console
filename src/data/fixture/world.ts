@@ -192,7 +192,7 @@ export const SEAMS: readonly Seam[] = RAW_SEAMS.map((s) => ({ ...s, at: dayDate(
 /**
  * Declared deployments, at minute precision.
  *
- * The v3 attribution interaction exists for these: an operator records a label and an instant,
+ * The attribution interaction exists for these: an operator records a label and an instant,
  * per fleet, and the platform infers no blast radius. Both sit on the corpus's newest day so the
  * 3 h and 48 h lens views have a marker to draw and a before/after to compute: the affinity
  * change lands 40 minutes before the series edge, which is what exercises the "after span still
@@ -504,7 +504,7 @@ export function frontierDay(age: AgeScript): string {
 }
 
 /**
- * The newest day whose final whole re-derivation ran (analyzer grain ladder §4.8.2): the day
+ * The newest day whose final whole re-derivation ran: the day
  * before the frontier in this corpus, because the frontier day is still being classified at
  * ingest cadence while the completed day behind it has been restated from the full model.
  */

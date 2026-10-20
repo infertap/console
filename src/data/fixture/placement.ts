@@ -144,7 +144,7 @@ function pairsFor(day: string, dayIdx: number): PlacementRow[] {
   }
 
   // The undeclared bucket is a named slice, never folded away and never dropped. A producer
-  // that declared nothing has not declared "no workload", it has said nothing (spec §2.7), and
+  // that declared nothing has not declared "no workload", it has said nothing, and
   // collapsing the two would report uncategorized traffic as traffic categorized as none.
   out.push({
     workload: 'undeclared',

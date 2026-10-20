@@ -14,7 +14,7 @@ import styles from './Figure.module.css';
  * a reader has about any figure on this page are answered by the type system rather than by
  * whoever wrote the panel.
  *
- * The rule it enforces, from `read-api.md` §2.2: a number without its coverage is unrepresentable
+ * The rule it enforces: a number without its coverage is unrepresentable
  * in the Rust type, and nothing here may reconstruct one by pulling `.value` out and rendering it
  * alone. A lint blocks the other route, which is formatting a number outside the design system.
  *
@@ -24,7 +24,7 @@ import styles from './Figure.module.css';
  * - `figure.register` is the BOUND, always `>=`. Every figure this product states is a lower
  *   bound, because unobserved mass is not counted and is not estimated.
  * - the `register` prop is the ACCOUNTING register, recompute or capacity. They never share an
- *   axis and never share a hue family, so that dashboard §1.1's separation holds by construction.
+ *   axis and never share a hue family, so that the separation of the registers holds by construction.
  */
 
 export type AccountingRegister = 'recompute' | 'capacity';

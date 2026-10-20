@@ -9,14 +9,13 @@ import { TrustSection } from './Trust';
 import styles from './Document.module.css';
 
 /**
- * Level 0: the document, rebuilt to the v3 design.
+ * Level 0: the document.
  *
- * **Three sections: repeat compute, placement, trust.** The v3 ruling set collapsed the ten
- * panels: the hero became the anchor line, the gap curve re-formed as the thrash lens and its
- * curve demoted to a drill, what-changed dissolved into markers on the metric charts with
- * attribution as an interaction, blocks-by-mass and the rank table became drills behind the
- * breakdown, and the max-k residual figure is superseded by token-hours. Words on glass survive
- * as labels, units, provenance and hover definitions; the gauges tell the story.
+ * **Three sections: repeat compute, placement, trust.** The anchor line is the hero; the
+ * thrash lens is the repeat-compute meter's face, with its curve a drill beneath it; markers
+ * sit on every metric chart with attribution as an interaction; blocks by mass and the rank
+ * table are drills behind the breakdown; duplication is measured in token-hours. Words on
+ * glass are labels, units, provenance and hover definitions; the gauges tell the story.
  *
  * One layout at every age still holds: sections resolve, never reflow.
  */

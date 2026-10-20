@@ -77,9 +77,9 @@ import * as w from './world';
  * The world, rendered as the bytes the API would send.
  *
  * **Contract-shaped, not mock-shaped.** Every response here is validated against
- * `contract/openapi.json`'s schemas by `test/fixture-parity.test.ts`, which is the compensating
- * mechanism `read-api.md` §2.2.1 named: assert the spec's schemas validate the fixture bytes. It
- * was vacuous before per-path schemas existed. It is not vacuous now.
+ * `contract/openapi.json`'s schemas by `test/fixture-parity.test.ts`, which asserts the spec's
+ * schemas validate the fixture bytes. It was vacuous before per-path schemas existed. It is not
+ * vacuous now.
  *
  * Where the contract and the mock disagree the contract wins, and the disagreement is recorded
  * rather than smoothed over. The clearest case is the 90-day trend: the mock draws one series
@@ -168,7 +168,7 @@ function errorBody(
 /**
  * Pass-clock endpoints before the first pass.
  *
- * Never a zero. `read-api.md` §7.2: the pass having never run is a 503 with `no_pass_yet`, and
+ * Never a zero. The pass having never run is a 503 with `no_pass_yet`, and
  * the console renders that as the t0 page state rather than as a failure the operator caused.
  */
 function requirePass(age: w.AgeScript): void {
@@ -557,7 +557,7 @@ function paginate<T>(
 // ── Scope: which slice to answer about, beside dims, which says how to group ─────────────────
 
 /**
- * The scope params, resolved to a fleet share (pin `eb511e6`).
+ * The scope params, resolved to a fleet share.
  *
  * Holder wins over instance, being the narrower claim, and a malformed holder spelling is a
  * 404 with `unknown_holder`, as the wire parses it. A well-formed scope the corpus never saw
@@ -974,7 +974,7 @@ export function coverageFor(
   const windowMs = days * 86_400_000;
   if (query.by === 'instance') {
     return {
-      // Both bases per row since pin `2d0db9e`, with the sums that make the token-weighted one
+      // Both bases per row, with the sums that make the token-weighted one
       // mergeable: merge days by Σwsum / Σtokens, never by averaging fractions. The corpus
       // scripts one engine with no classified mass, so the absent-fields state is reachable:
       // absence is "no mass to weight", never a zero.
@@ -1257,12 +1257,11 @@ const BAND_DIM_CUTS: Readonly<Record<string, CutKey>> = {
  * The thrash lens's bytes: the five observed bands in rows with the cut riding `dims`, and the
  * gap-unobserved mass as its own figure beside them, never a sixth band.
  *
- * Minute grain serves since the banded-minute ruling (analyzer `27c491f`), and the panel
- * stops `14d`/`48h`/`3h` resolve against the emission frontier through the same authority as
- * the copies read (pin `eb511e6`). The corpus models the standing bounds: the holder cut at
+ * Minute grain serves, and the panel stops `14d`/`48h`/`3h` resolve against the emission
+ * frontier through the same authority as the copies read. The corpus models the standing bounds: the holder cut at
  * minute grain refuses by name (the minute cells are kept per rank with cache groups rolled
  * up, so a holder cut has no minute table, while an instance or holder scope and the instance
- * cut serve from those rank cells, landing 7), and a window outside the minute tier's 48-hour
+ * cut serve from those rank cells), and a window outside the minute tier's 48-hour
  * reach refuses with its bound rather than downgrading. Everything else matches the wire:
  * buckets, band strings, dims vocabulary.
  */
@@ -1295,7 +1294,7 @@ export function bandsFor(
   const desc = bandsDesc(query.window ?? '14d', query.grain ?? 'auto');
   const grainWord =
     desc.bucketMs >= 86_400_000 ? 'day' : desc.bucketMs >= 3_600_000 ? 'hour' : 'minute';
-  // The standing rule, modeled (landing 7): the minute cells are kept per rank with cache
+  // The standing rule, modeled: the minute cells are kept per rank with cache
   // groups and tiers rolled up. An instance or holder scope and the instance cut serve from
   // them; a holder cut has no minute table and refuses by name, in the route's own words.
   if (grainWord === 'minute' && dim === 'holder') {

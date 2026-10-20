@@ -63,9 +63,9 @@ export interface NarrowedRefusal {
   /**
    * The facts that make the refusal actionable: the horizon, the marker, the generation.
    *
-   * Absent only where the cause is self-describing, never because nobody supplied it. §7.1's
-   * rule is that a refusal which does not state its bound is the vague 404 the section exists to
-   * prevent, and as of pin `13a50c8` the in-band shape carries it.
+   * Absent only where the cause is self-describing, never because nobody supplied it. A refusal
+   * which does not state its bound is the vague 404 the refusal scheme exists to prevent, and
+   * the in-band shape carries it.
    */
   readonly bound?: unknown;
   /**
@@ -90,7 +90,7 @@ export function narrow(refusal: Refusal): NarrowedRefusal {
 /**
  * A transport-level failure: a status the API decided rather than a bounded refusal it returned.
  *
- * The split is `read-api.md` §7.2's. A well-formed request whose answer a data bound prevents is
+ * The split is the read API's. A well-formed request whose answer a data bound prevents is
  * a 200 with `data.refused`, and that is a result the document renders in place. This class is
  * for the rest: no session, a malformed request, a subject that never existed, an engine that is
  * not there.
@@ -105,7 +105,7 @@ export class ApiError extends Error {
 
   /**
    * A 200 whose stamp says no pass has classified a day yet, on a read whose data a pass
-   * produces. **Not a wire cause since analyzer landing 2 of the grain ladder** (2026-09-02):
+   * produces. **Not a wire cause:**
    * a relative window no longer needs a pass to exist, so `no_pass_yet` left the closed set
    * and the fact moved to the stamp (`pass.frontier_day` null). The data layer turns that
    * fact into this state so every panel keeps its "fills with the first pass" copy.

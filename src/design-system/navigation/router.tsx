@@ -19,7 +19,7 @@ import {
  * **URL is state everywhere** is a law here rather than a convention, which keeps what a router
  * owes this product small and specific: parse the address, keep it in sync with what is on
  * screen, and never invent a state the address cannot express. A dependency would bring routing
- * concepts this product has ruled out and would be the largest thing in the bundle after React.
+ * concepts this product does not use and would be the largest thing in the bundle after React.
  *
  * Deep links work because the daemon's console mount falls back to `index.html` for unmatched
  * paths, so `/holder/i-004/0/1` reaches the table rather than a 404.

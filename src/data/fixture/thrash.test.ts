@@ -75,7 +75,7 @@ describe('the bands read', () => {
     expect(() => bandsFor(T3, { window: '14d', grain: 'minute' })).toThrow(/48 hours/);
   });
 
-  it('refuses the holder cut at minute grain by name, per the standing ruling', () => {
+  it('refuses the holder cut at minute grain by name', () => {
     const threeHours = `${THRASH_EDGE_MS - 3 * 3_600_000},${THRASH_EDGE_MS}`;
     expect(() => bandsFor(T3, { window: threeHours, grain: 'minute', dims: 'holder' })).toThrow(
       /minute/,

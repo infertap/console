@@ -85,8 +85,7 @@ export function presetWindow(key: '14d' | '48h' | '3h', edgeMs: number): WindowD
       rangeLabel: '48 h',
     };
   }
-  // The 3 h stop serves at minute grain since the copies read joined the one vocabulary
-  // (analyzer landing 2): 180 whole minutes through the current one, never `5min`.
+  // The 3 h stop serves at minute grain: 180 whole minutes through the current one, never `5min`.
   return {
     key,
     label: '3 h',

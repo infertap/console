@@ -16,7 +16,7 @@ import styles from './Attribution.module.css';
  * The attribution interaction a metric panel carries: the marker index, and the selected
  * marker's before/after card.
  *
- * **Dissolved as a standalone section by ruling**: a second recompute series violated "the trend
+ * **Not a standalone section**: a second recompute series violated "the trend
  * renders exactly once", so markers render on every metric chart and attribution rides the
  * panels as an interaction. Both registers appear on the card as numbers, beside and never on
  * one axis, the panel's own register leading; a breaking marker refuses its comparison instead

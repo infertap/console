@@ -53,7 +53,7 @@ describe('the workload page', () => {
 
   it('offers the 3 h stop and serves every read at minute grain, the members read included', async () => {
     // A workload is a key column on the fleet minute cells, and the instance cut serves from
-    // the rank-grain minute cells (landing 7), so no read on this page steps down a tier.
+    // the rank-grain minute cells, so no read on this page steps down a tier.
     window.history.replaceState(null, '', '/workload/rag-batch?win=3h');
     render(
       <DataProvider source={new FixtureDataSource({ age: 't3' })}>
@@ -275,7 +275,7 @@ describe('the instance page', () => {
   });
 
   it('offers the 3 h stop and serves it at minute grain, with the ranks read at hour', async () => {
-    // An instance scope serves at minute from the rank-grain cells (landing 7), and so does
+    // An instance scope serves at minute from the rank-grain cells, and so does
     // the peers read's instance cut. The ranks read groups by holder, which those cells roll
     // up, so that one read asks the hour tier and its head says which tier answered.
     window.history.replaceState(null, '', '/instance/i-003?win=3h');
@@ -303,7 +303,7 @@ describe('the instance page', () => {
   });
 
   it('at the 3 h stop the duplication panel draws minute-wide bars from the minute cut and says so', async () => {
-    // Analyzer landing 10: the read takes `grain`, the 3 h stop asks minute, and the response
+    // The read takes `grain`, the 3 h stop asks minute, and the response
     // states the width it served. The head, the unit line and the bars all follow `bucket_ms`
     // rather than assuming an hour, so the panel draws 180 columns and not three.
     window.history.replaceState(null, '', '/instance/i-005?win=3h');
@@ -579,7 +579,7 @@ describe('the rank page', () => {
   });
 
   it('offers the 3 h stop at minute grain and says the cells are kept per rank', async () => {
-    // A holder scope serves at minute from the rank-grain cells (landing 7), where a holder
+    // A holder scope serves at minute from the rank-grain cells, where a holder
     // IS a rank: the cache group rolls up, and the glass says so at that stop.
     window.history.replaceState(null, '', '/instance/i-001/rank/0/0?win=3h');
     render(
