@@ -1,0 +1,18 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* Drill-page panels. The instrument table itself lives in the design system. */
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.25rem 3rem;
+  align-items: start;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  color: var(--graphite);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin: 0;
+}

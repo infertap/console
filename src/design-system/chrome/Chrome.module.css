@@ -1,0 +1,349 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* Figure and ground.
+
+   EXACTLY ONE DARK SURFACE exists in this product, and it is the status strip. The
+   rule behind it is semantic rather than decorative:
+
+     the dark strip  carries wall-clock-live facts: LIVE, next tick, last segment,
+                     ingest lag, raw horizon, discriminator
+     the light canvas carries pass-clock accounting: every figure that moves only
+                     when a pass completes
+
+   A number never crosses that boundary. The rail is one tint step off the canvas
+   with a hard hairline edge, distinguished by tint and edge and never by ink,
+   because a second dark band would spend weight the wall clock has not earned. */
+
+.app {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  min-height: 100vh;
+  background: linear-gradient(
+    to right,
+    var(--rail-bg) 0 calc(var(--rail-w) - 1px),
+    var(--rule) calc(var(--rail-w) - 1px) var(--rail-w),
+    transparent var(--rail-w) 100%
+  );
+}
+
+.collapsed {
+  --rail-w: 3.25rem;
+}
+
+@media (max-width: 52rem) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+    background: none;
+  }
+}
+
+/* ── the rail: DESTINATIONS, never sections ───────────────────────────────── */
+
+.rail {
+  padding: 0.85rem 0 2rem;
+  position: sticky;
+  top: 1.35rem;
+  align-self: start;
+  height: calc(100vh - 1.35rem);
+  overflow-y: auto;
+}
+
+@media (max-width: 52rem) {
+  .rail {
+    position: static;
+    height: auto;
+    background: var(--rail-bg);
+    border-bottom: 1px solid var(--rule);
+  }
+}
+
+.group {
+  margin-bottom: 1.5rem;
+}
+
+.groupLabel {
+  font-family: var(--mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pencil);
+  padding: 0 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+
+.item:hover {
+  color: var(--ink);
+  background: var(--paper-3);
+}
+
+/* An accent indicator on the active item, which is how the rail marks position
+   without spending ink on a second dark surface. */
+.item[aria-current] {
+  color: var(--ink);
+  border-left-color: var(--petrol);
+  background: var(--plate);
+}
+
+.glyph {
+  width: 1.05rem;
+  flex: none;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--pencil);
+}
+
+.item[aria-current] .glyph {
+  color: var(--petrol);
+}
+
+.text {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.collapsed .text,
+.collapsed .groupLabel {
+  display: none;
+}
+
+.toggle {
+  margin: 0 0 0.9rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--graphite);
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+}
+
+/* ── the one dark row ─────────────────────────────────────────────────────── */
+
+.main {
+  min-width: 0;
+}
+
+.topbar {
+  background: var(--chrome);
+  color: var(--chrome-text);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem 0.85rem;
+  flex-wrap: wrap;
+  padding: 0.38rem clamp(0.6rem, 1.2vw, 0.9rem);
+  font-size: 0.625rem;
+}
+
+/* The fleet name renders ONCE, in the chrome, so the page opens on its canonical
+   stamp rather than repeating it down the document. */
+.fleet {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding-right: 0.7rem;
+  border-right: 1px solid var(--chrome-rule);
+}
+
+.mark {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.fleetName {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  color: var(--chrome-text);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.statusline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.8rem;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  color: var(--chrome-dim);
+}
+
+.stat {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: baseline;
+}
+
+.statKey {
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.statValue {
+  color: var(--chrome-text);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* The discriminator truncates and gives its full value on hover: it is an identity,
+   not a figure, and its length would otherwise dominate the row. */
+.trunc {
+  border-bottom: 1px dotted var(--chrome-rule);
+  cursor: help;
+}
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--chrome-text);
+}
+
+.dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  background: var(--chrome-accent);
+  flex: none;
+}
+
+/* Idle renders as honest idle. Nothing loops, and the strip does not pretend to be
+   receiving when it is not. */
+.dotIdle {
+  background: #6d756c;
+}
+
+.clock {
+  font-variant-numeric: tabular-nums;
+  color: var(--chrome-dim);
+}
+
+/* Ingest renders as bursts, because ingestion is bursty. One flash per batch, and
+   `prefers-reduced-motion` resolves it to its end state. */
+.burst {
+  animation: flash 900ms ease-out 1;
+}
+
+@keyframes flash {
+  0% {
+    background: var(--chrome-accent);
+  }
+  100% {
+    background: #6d756c;
+  }
+}
+
+.kick {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--chrome-rule, var(--rule));
+  background: transparent;
+  padding: 0.15rem 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  white-space: nowrap;
+  color: var(--chrome-text);
+  cursor: pointer;
+}
+.kick:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.newData {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--chrome-accent);
+  background: transparent;
+  padding: 0.15rem 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  white-space: nowrap;
+  color: var(--chrome-text);
+  cursor: pointer;
+}
+
+.newDataDot {
+  width: 0.4rem;
+  height: 0.4rem;
+  background: var(--chrome-accent);
+  flex: none;
+}
+
+/* The mock banner is amber test-rig tape, deliberately NOT product chrome, so it
+   stops adding mass to the frame in screenshots. */
+.rig {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  background: repeating-linear-gradient(45deg, #efe3c6 0 7px, #e7d7b0 7px 14px);
+  color: #6b5216;
+  border-bottom: 1px solid #c9a95f;
+  font-family: var(--mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem 1.25rem;
+  flex-wrap: wrap;
+  padding: 0.18rem 0.75rem;
+}
+
+.rigLabel {
+  color: #8a6f22;
+}
+
+.ages {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.age {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid #c9a95f;
+  background: rgba(255, 255, 255, 0.45);
+  color: #6b5216;
+  padding: 0.08rem 0.35rem;
+  cursor: pointer;
+}
+
+.age[aria-pressed='true'] {
+  background: #6b5216;
+  color: #f4ecd8;
+  border-color: #6b5216;
+}

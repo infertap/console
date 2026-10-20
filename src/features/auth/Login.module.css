@@ -1,0 +1,63 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+.form {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.input {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--rule);
+  background: var(--canvas);
+  color: var(--ink);
+  min-width: 22rem;
+  max-width: 100%;
+}
+
+.input:focus-visible {
+  border-color: var(--ink);
+}
+
+/**
+ * The account field. Present so the password manager has a username to key the saved token on
+ * (F6); readonly because viewer is the only role the API has. Narrow and quiet, so the field the
+ * operator actually fills stays the one their eye lands on.
+ */
+.account {
+  min-width: 7rem;
+  width: 7rem;
+  color: var(--graphite);
+  background: transparent;
+}
+
+.submit {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+}
+
+.submit:disabled {
+  background: transparent;
+  color: var(--pencil);
+  border-color: var(--rule);
+  cursor: default;
+}

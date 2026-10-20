@@ -1,0 +1,101 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* The instrument table.
+
+   Shared, because holders, day, evidence and the block drill all render rows of
+   figures and they must line up the same way. It lives in the design system rather
+   than in whichever feature needed it first, which is the boundary lint's point:
+   the second feature to want a style is the signal it was never that feature's.
+
+   Tabular lining numerals everywhere, so a digit change does not shift the column
+   beside it. */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.table th {
+  text-align: left;
+  font-weight: 500;
+  font-size: 0.625rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  padding: 0.35rem 0.6rem 0.35rem 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.42rem 0.6rem 0.42rem 0;
+  border-bottom: 1px solid var(--rule-2);
+  vertical-align: middle;
+}
+
+.row:hover {
+  background: var(--canvas);
+}
+
+.num {
+  text-align: right;
+}
+
+/* Declared, and absent reads as unattributed: nobody declared it, which is a
+   different claim from a value of "unattributed". */
+.undeclared {
+  color: var(--pencil);
+}
+
+.quiet {
+  color: var(--graphite);
+}
+
+.link {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+/* Anything clickable says so before it is clicked. */
+.chev {
+  color: var(--pencil);
+  text-align: right;
+}
+
+.row:hover .chev {
+  color: var(--ink);
+}
+
+/* ── The coverage cell ───────────────────────────────────────────────────────
+   Coverage is the column a reader scans to know which rows to believe, and as
+   plain text a 44% row and a 99% row are the same shape. The bar is the figure
+   itself drawn to scale, not a judgement about it: it encodes the number that is
+   already printed beside it and nothing more. Crimson below 0.75 matches the
+   threshold the state chip in the same row already uses, so the two cannot
+   disagree. */
+.coverageCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.coverageTrack {
+  display: block;
+  width: 3.25rem;
+  height: 0.3rem;
+  background: var(--paper-2);
+}
+
+.coverageTrack i {
+  display: block;
+  height: 100%;
+  background: var(--seq-4);
+}
+
+.coverageTrack[data-impaired='true'] i {
+  background: var(--crimson);
+}

@@ -1,0 +1,180 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   Design tokens, ported verbatim from `mockups/assets/console-v2.css`.
+
+   The mock is the design source of truth. Values here are copied, not re-derived,
+   because a token that drifts from the mock makes the mock stop being a reference.
+
+   THE SURFACE RULE, semantic rather than decorative:
+     dark chrome carries WALL-CLOCK-LIVE facts (LIVE, next tick, last segment,
+       ingest lag, raw horizon, discriminator)
+     the light canvas carries PASS-CLOCK ACCOUNTING (every figure that moves only
+       when a pass completes)
+   A number never crosses that boundary.
+
+   COLOUR CARRIES SEMANTIC STATE ONLY. The three meaning colours are petrol for the
+   recompute register, ochre for the capacity register (an unrelated hue family, so
+   dashboard §1.1's separation of the two registers holds by construction), and
+   crimson for attention-worthy findings and nothing else.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* Vendored woff2, zero external fetches. An air-gapped browser renders this
+   exactly as a connected one does, and scripts/audit-bundle.mjs proves it. */
+@font-face {
+  font-family: 'Fraunces Variable';
+  src: url('./fonts/fraunces-latin-full-normal.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-display: block;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('./fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('./fonts/ibm-plex-sans-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-display: block;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('./fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-display: block;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('./fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('./fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-display: block;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('./fonts/ibm-plex-mono-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-display: block;
+}
+
+:root {
+  --paper: #e6eae4;
+  --paper-2: #dde2da;
+  --paper-3: #d3d9d0;
+  --ink: #1a1d1a;
+  --graphite: #5b625a;
+  --pencil: #a6aaa1;
+  --rule: #c5cabf;
+  --rule-2: #d6dbd2;
+
+  --petrol: #0c5c58;
+  --ochre: #b8791a;
+  --crimson: #b32c5e;
+
+  --seq-1: #d2e3df;
+  --seq-2: #aecfc9;
+  --seq-3: #86b5ae;
+  --seq-4: #5c9992;
+  --seq-5: #3b7d77;
+  --seq-6: #1e625d;
+  --seq-7: #0c4744;
+
+  /* The two registers, never sharing an axis. */
+  --register-recompute: var(--petrol);
+  --register-capacity: var(--ochre);
+
+  /* The capacity register's ramp (v3): ordered copy-count bands need sequential steps of the
+     register's own hue, exactly as the recompute register borrows the seq scale. Monotonic
+     lightness, wide adjacent steps; stacked segments carry a plate-colored gap stroke so
+     adjacency never rests on hue alone. */
+  --cap-1: #eddcba;
+  --cap-2: #d3a852;
+  --cap-3: #b8791a;
+  --cap-4: #7a4c0c;
+
+  --display: 'Fraunces Variable', Georgia, serif;
+  --body: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --measure: 34rem;
+  --rail-w: 13rem;
+
+  /* Exactly one dark surface: the live status strip. */
+  --chrome: #1a1d1a;
+  --chrome-text: #e6eae4;
+  --chrome-dim: #8b938a;
+  --chrome-rule: #343a33;
+  --chrome-accent: var(--seq-3);
+
+  /* The rail is one tint step off the canvas with a hard hairline edge. It is
+     distinguished by tint and edge, never by ink, because a second dark band would
+     spend weight the wall clock has not earned. */
+  --rail-bg: #dee2d9;
+
+  --canvas: var(--paper);
+  --plate: #f6f8f4;
+
+  /* One inter-plate spacing token, visibly larger than any intra-plate gap. */
+  --gap-plate: 1.15rem;
+  --gap-in: 0.55rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+img,
+svg,
+pre,
+table {
+  max-width: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  font-synthesis-weight: none;
+  /* The desk is the target. Narrow widths are kept correct rather than optimised,
+     and correct means the page never scrolls sideways. */
+  overflow-x: hidden;
+}
+
+/* Tabular lining numerals everywhere a number appears, so columns of figures line
+   up and a digit change does not shift the ones beside it. */
+.tabular {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Motion only when data moved or the user acted, and `prefers-reduced-motion`
+   resolves every sequence to its end state rather than replaying it slower. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--petrol);
+  outline-offset: 1px;
+}

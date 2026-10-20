@@ -1,0 +1,79 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* The gallery's own layout. Deliberately plain: this page exists to show the design
+   system's components, so it must not compete with them. */
+
+.page {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem 6rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.h1 {
+  font-family: var(--display);
+  font-variation-settings: 'SOFT' 60, 'WONK' 1, 'opsz' 120;
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3vw, 2.125rem);
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0 0 0.5rem;
+}
+
+.lead {
+  margin: 0;
+  max-width: var(--measure);
+  color: var(--graphite);
+}
+
+.section {
+  background: var(--plate);
+  padding: 1rem 1.1rem 1.2rem;
+  margin-bottom: var(--gap-plate);
+}
+
+.h2 {
+  font-family: var(--display);
+  font-variation-settings: 'SOFT' 60, 'WONK' 1, 'opsz' 120;
+  font-weight: 600;
+  font-size: clamp(1.125rem, 1.8vw, 1.3125rem);
+  letter-spacing: -0.018em;
+  line-height: 1.1;
+  margin: 0 0 0.4rem;
+}
+
+.note {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  margin: 0 0 1rem;
+  max-width: var(--measure);
+  line-height: 1.7;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* Two columns so a figure and its designed absence sit at the same height and the
+   same tier, which is the comparison this page exists to make possible. */
+.pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1.5rem 3rem;
+  align-items: start;
+  padding: 1rem 0;
+  border-top: 1px solid var(--rule-2);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}

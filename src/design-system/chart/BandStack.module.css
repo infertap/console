@@ -1,0 +1,55 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+.box {
+  margin-top: 0.5rem;
+  font-family: var(--mono);
+}
+
+.box svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.axis {
+  fill: var(--graphite);
+  font-family: inherit;
+  font-size: 10px;
+}
+
+.tick {
+  fill: var(--graphite);
+  font-family: inherit;
+  font-size: 9px;
+}
+
+.unit {
+  fill: var(--graphite);
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+.dagger,
+.daggerSelected {
+  fill: var(--ink);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.daggerSelected {
+  font-weight: 700;
+}
+
+.readout {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  min-height: 1.15rem;
+  margin: 0.25rem 0 0;
+}
+
+.readout b {
+  color: var(--ink);
+  font-weight: 500;
+}

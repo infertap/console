@@ -1,0 +1,97 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* The pair matrix. Placement is its own register and borrows neither meaning hue: petrol is
+   recompute and ochre is capacity, so this takes the sequential ramp, which carries magnitude
+   without claiming to be either of them. */
+
+.wrap {
+  margin-top: 0.75rem;
+}
+
+.grid {
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+}
+
+.head,
+.rowhead {
+  font-weight: 500;
+  color: var(--graphite);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.head {
+  padding: 0 0 0.35rem;
+  text-align: center;
+  width: 1.5rem;
+}
+
+.rowhead {
+  padding: 0 0.6rem 0 0;
+  text-align: right;
+}
+
+.corner {
+  padding: 0;
+}
+
+.cell {
+  padding: 1px;
+}
+
+.tile {
+  display: block;
+  width: 1.35rem;
+  height: 1.35rem;
+  background: var(--seq-6);
+}
+
+/* Intensity carries magnitude, so confidence cannot also ride it: a pale cell already means
+   small. A thin cell is MARKED, with a corner rule, and the key says what the mark is. */
+.tile[data-thin='true'] {
+  box-shadow: inset 0 0 0 1.5px var(--crimson);
+}
+
+/* The diagonal is not a value. An engine holds no duplicate against itself at this grain, so it
+   renders as absent rather than as a zero-valued tile that invites reading. */
+.self {
+  display: block;
+  width: 1.35rem;
+  height: 1.35rem;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--rule-2) 0 1px,
+    transparent 1px 4px
+  );
+}
+
+/* The aggregation, declared. A matrix that silently summed a finer grain would be (b); saying
+   what it summed is what makes it (c). */
+.grain {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  margin: 0.7rem 0 0;
+}
+
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  margin: 0.7rem 0 0;
+}
+
+.keyItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.keyItem .tile {
+  width: 0.8rem;
+  height: 0.8rem;
+}

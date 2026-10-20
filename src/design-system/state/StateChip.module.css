@@ -1,0 +1,95 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* Honest-state chips. Ported from `.chip*` in the mock.
+
+   State words come only from the five, and always render as provenance-labelled
+   chips rather than as bare adjectives. The mark carries the state without relying
+   on colour alone: a fill, a hatch, a ring and a dashed ring are four different
+   shapes before they are four different colours. */
+
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  border: 1px solid var(--rule);
+  background: var(--canvas);
+  padding: 0.22rem 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+}
+
+.mark {
+  width: 0.55rem;
+  height: 0.55rem;
+  flex: none;
+  align-self: center;
+}
+
+.state {
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* Provenance is part of the chip, not a caption near it: a state word with no
+   provenance is an assertion, and this product does not make those. */
+.provenance {
+  color: var(--graphite);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  font-size: 0.625rem;
+}
+
+.value {
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.fine .mark {
+  background: var(--petrol);
+}
+
+.impaired .mark {
+  background: var(--crimson);
+}
+
+.impaired {
+  border-color: var(--crimson);
+}
+
+/* Hatched, matching the unexamined regions on the trend, so the same idea reads the
+   same way at chip scale and at chart scale. */
+.unexamined .mark {
+  background: repeating-linear-gradient(45deg, var(--graphite) 0 1.5px, var(--paper-2) 1.5px 4px);
+}
+
+.indeterminate .mark {
+  background: var(--paper);
+  border: 1px solid var(--graphite);
+  border-radius: 50%;
+}
+
+.unobserved .mark {
+  background: var(--paper);
+  border: 1px dashed var(--graphite);
+}
+
+.small {
+  font-size: 0.625rem;
+  padding: 0.12rem 0.4rem;
+}
+
+/* An unrecognised state word. Not a designed state: a contract break, rendered as
+   one, so nobody mistakes it for a sixth vocabulary entry. */
+.unrecognised {
+  border-style: dashed;
+  border-color: var(--crimson);
+}
+
+.unrecognised .state {
+  text-transform: none;
+  font-weight: 400;
+}

@@ -1,0 +1,56 @@
+name: Bug report
+description: The console rendered something other than what its documentation or the contract says.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. A vulnerability is not a bug report; see `SECURITY.md` and report it privately.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The output of `infertap-analyzer --version` on the analyzer serving the console; it prints the console's version and content hash.
+      placeholder: infertap-analyzer 1.0.10 / console v1.0.12 <hash>
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser
+      description: Name and version. Say if `prefers-reduced-motion` or a non-default zoom was on.
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What the console showed, with the page's address (every view is addressable) and the browser console's errors if any.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: What `README.md`'s laws, the panel's definition hover, or the analyzer's contract says should have rendered.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce
+      description: The smallest sequence that shows it. Fixture mode (`npm run dev`) reproductions are the easiest to act on.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before filing
+      options:
+        - label: I searched the existing issues.
+          required: true
+        - label: This is not a security vulnerability (those go to `SECURITY.md`).
+          required: true

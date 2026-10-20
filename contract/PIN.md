@@ -1,0 +1,100 @@
+# Contract pin
+
+Pinned: **analyzer `251d5f3bf78559d985506fdc1180769e4bf6e822`** (`251d5f3`, 2026-10-20).
+
+`openapi.json` in this directory is a **verbatim copy** of `analyzer/contract/openapi.json` at
+that commit. SHA-256 `2ae84fe0b3aa9dfbbcc1d3f49d4b0077aff7f61e997df40164c63a6d9b54af68`.
+
+**That hash is now checked** by `test/contract-pin.test.ts`, and it was not before. This file sat
+seven days claiming a commit and a digest that had stopped describing the bytes beside it, because
+a number written in prose is a number nobody re-reads. The same shape as the notices file that
+*claimed* fonts had been appended — a record is not a check until something compares it.
+
+## Why it is vendored rather than fetched
+
+This repo builds offline from `npm ci` with no network reachable, and the analyzer is a separate
+repository that CI here does not check out. A build that reaches across a repo boundary to
+resolve its own types is a build that fails on the machine that has no such boundary. So the
+spec is committed, the generated client is committed beside it, and moving the pin is a visible
+diff by construction — the same reason `analyzer/contract/PIN.md` exists one repo over.
+
+## What this pins
+
+The read seam: **24 paths, 25 operations, 74 schemas, 20 causes.** Specifically —
+
+- **The envelope.** Every 200 is `{stamp, data}`. Nothing arrives unstamped.
+- **`stamp.tick`**: the edges the last applied tick reached. `classified_to_ms` and its day
+  `classified_day`, `emitted_to_ms`, `covered_to_ms`, `audited_to_ms`, `settled_through_day`, and
+  `at_ms`; each null until a tick has stated it. The status strip says "classified through"
+  beside the horizon. `audited_to_ms` is the sampled audit's edge: it equals the classified edge
+  unless a sample disagreed, and the console renders nothing for it yet.
+- **`Figure`.** Four fields, all always present. A naked number is unrepresentable in the Rust
+  type, on the wire, and in `src/data/generated/api.d.ts`. Nothing here may reconstruct one by
+  pulling `.value` out and rendering it alone.
+- **The closed cause set**, generated upstream from `error::Cause::all()` — the same slice the
+  error path switches on — so the document cannot name a cause the code lacks. `Refusal` and
+  `Error` both reference it, so the in-band and out-of-band refusals speak one vocabulary.
+- **The stream.** `GET /v1/events` and its three payload schemas. The frame grammar is prose
+  because OpenAPI cannot describe one; the `data:` payloads are schematised, which is the part
+  that has fields to rename and therefore the part the canary can check.
+- **Pagination**, on six surfaces: an opaque `cursor` bound to the stamp that minted it. `limit`
+  caps at 200. `/v1/blocks` is a ranking rather than a page and issues no cursor by design.
+- **A stale cursor is a result, not an error.** 200 with the envelope intact: the stamp, the
+  heading and the page block survive and only the rows are replaced. `/v1/days/{day}` refuses its
+  holders SECTION without taking the unpaged sections with it.
+- **A refused payload is absent, never empty.** The payload is null exactly when its refusal is
+  present, so an empty array always means "looked and found nothing" and null always means "the
+  read was refused". A consumer that skips the refusal check gets a type error rather than a
+  silently empty table.
+- **Every error status is declared**, with `x-causes` naming which causes reach which status on
+  which operation, so a caller narrows per status rather than switching on all 20 at every catch.
+
+## Regenerating the client
+
+```
+cp ../analyzer/contract/openapi.json contract/openapi.json
+npm run gen:client
+```
+
+Then update the commit, the date and the SHA-256 above, and let `npm run typecheck` name every
+file the change reached. That last step is the point: a pin bump whose type errors were not read
+is a pin bump nobody verified.
+
+**Never edit `openapi.json` or `src/data/generated/api.d.ts` by hand.** The spec is generated
+from the analyzer's wire types and CI-diffed there; if it looks wrong, that is a finding to
+report, not to patch here. `.github/workflows/canary.yml` regenerates against the analyzer's
+`main` on a schedule so a break surfaces within hours with the analyzer commit named, rather
+than the next time somebody happens to run a build.
+
+## History
+
+| pin | what moved |
+|---|---|
+| `251d5f3` | The `tier` dimension leaves the analyzer: `dims` on the figures reads is `class`, `holder`, `instance`, `workload` and `model`. The console never asked for it. A degradation's `scope` is words on the wire (`run <incarnation> (<instances>)`, `instance <id>`, `holder <instance>/<rank>/<group>`) where it was a Debug rendering; the health page shows it as text. Descriptions moved on the envelope, the refusal and the duplication read. No path, schema or cause moved. |
+| `ab6b54d` | The time-since-eviction bands are `<10s`, `10s-1m`, `1-10m`, `10-60m` and `none`: the examined history is an hour, `<1m` splits in two, and `1h-1d` and `>1d` are gone. The band is a string on the wire, so only the descriptions of the bands read moved; the panels state four observed bands. The discriminator token in the examples is `s1000x3600000`. No path, schema or cause moved. |
+| `62dc222` | `/v1/residual/whales` reads the whale register: each settled day keeps its heaviest identities up to the cut, and its exact totals over every identity. The response states `days_stated`, `cut` and `duplicated_identity_days`; each row gains `days_in_cut` and `dup_token_ms_bound`, the most it falls short by on days it was left out of a cut. `emitted_to_ms` and `duplicated_identities` leave the response. The panel marks a bounded row with ≥ and says the open day is stated once it settles. No path or cause moved. |
+| `211c1c4` | The stamp's `tick` gains `audited_to_ms`, the sampled audit's edge: before it, every block the analyzer re-derived from its log agreed with what its tick stated. The `declared_days` description on `raw_horizon` moved (the shed rung is gone). No path, schema or cause moved. |
+| `c65605b` | `/v1/residual/replication` carries `zero_basis`: what a cross-engine figure of zero means (spec 5.7), `positive`, `measured`, `single_holder`, `not_comparable`, `split_key_space` or `partly_comparable`, with the instance, store, comparable-store and key-space counts behind it. Descriptions moved on the evidence records and the ingest batch event. No path or cause moved. |
+| `9b3e204` | One coverage path. Figure buckets lose `stamped_events` and evidence records lose `coverage_path`: both were constant. The evidence table loses its coverage path column. |
+| `637463a` | The analyzer's keyed pipeline replaces the classification pass (semantics `js-7`). The stamp's `pass` object is `tick`, with the edges above; the SSE event `pass_completed` is `tick_applied`, carrying `classified_day`. `/v1/blocks` serves each day's blocks by stored mass from a bounded summary (`days`, each with its capacity, cut, error bound and per-block bounds; register `stored`), no page and no `read_from`. Drills say `read_from` `log` (a block re-derived from the log) or `ring` (a holder's newest stores). `/v1/evidence` takes `block` or `holder` and a window; its `day` selector is gone, and the day page now opens its heaviest holder's records for the day. `/v1/health` modules state a span (`stated_from_day` to `stated_through_day`). New: `/v1/tags`, and the cause `request_invalid` (19 causes to 20). The stale cursor's bound names `current_tick_at_ms` and `current_classified_day`. This pin names a commit on the analyzer's `v1/l6-working-state`; `main` fast-forwards to it. |
+| `9b4c7f0` | Phase 0 of the fold proposal, the quantiles cut (`docs/proposal-phase0-cut-quantiles.md`, ruled 2026-09-15). Gone: `GET /v1/distributions/gap` and its `DistributionData` / `DistributionRow` schemas — the t-digest sketch tables behind them left the analyzer, and with them the only non-additive derivation in the store. The console drops the per-instance gap CDF (`GapCdf`, the instance page's panel 5) and the `gapDistribution` seam method; the short-vs-long gap split stays on `/v1/figures/bands`, which is additive. No cause moved. |
+| `490ad54` | Landing 11b of the grain ladder (`docs/proposal-grain-ladder.md` §4.9): the drill is a fetch from a derived tier in the customer's bucket. `TimelineData`, `BlockHoldersData`, `BlocksData` and `EvidenceData` gain `read_from` (`local` / `cache` / `bucket`), so a drill page can say when a request left the box. No path, schema or cause moved. |
+| `de3fef0` | Landing 10 of the grain ladder (`docs/proposal-grain-ladder.md` §4.5.4): instance duplication at minute grain. `/v1/instances/{instance}/duplication` takes `grain` and resolves it the way the copies read does, on the fleet tiers' reach: a `3h` window inside the minute tier's reach serves minute-wide rows from the new `replication_instance_minute` cut (on the minute retention knob, seven days by default), and a day ask reads the hourly cut and says `hour`. An explicit tier past its reach refuses with `grain_unavailable`, now declared on the route's 400. `InstanceDuplicationData` gains `grain` and `bucket_ms`, so the instance page's "held twice inside this node" panel draws its 3 h bars at the width the response states rather than as three hour-wide columns. The analyzer pins the minute rows summed to the hour equal to the hourly rows; the fixture holds the same law. Paths, operations, schemas and causes unchanged. |
+| `6a27ffd` | The analyzer's greenfield collapse (`docs/proposal-grain-ladder.md` Appendix C and D, landing 9). Gone: `/v1/residual` (the flat residual figure with `zero_meaning` and `comparability`), `/v1/changed` and the five causes only it raised, `/v1/declared-inputs`; `PlacementBound` loses `refused_days` (only ever `null`) and its `source` names the pairs table (`replication_pairs_day`). 26 paths to 24, 24 causes to 19. This pin supersedes `52cda7f`'s PR. |
+| `52cda7f` | Landing 7 of the grain ladder (`docs/proposal-grain-ladder.md` §4.6.1): the rank-grain minute tier. `grain=minute` on `/v1/figures` and `/v1/figures/bands` now serves an `instance` or `holder` scope and the `instance` cut from cells kept per rank (a holder is a rank there: cache groups and tiers roll up), where landing 2 refused them by name; `dims=holder` and `dims=tier` at minute stay refused. Only the grain parameter's description moved on the wire. The instance and rank pages can now offer the 3 h stop; that is a console change of its own, not made here. |
+| `43bb809` | Landing 6a of the grain ladder (`docs/proposal-grain-ladder.md` §4.5.1). The copies read serves each grain from its own table: the minute cells, and two new rollups (`replication_hourly`, `replication_daily`) the producer tick writes beside them from one computation. Reach is measured per tier and bounded by that tier's horizon; an explicit `hour` past its reach refuses by name the way `minute` did. The `getReplication` description says so; nothing else on the wire moved. |
+| `8b905bd` | Landing 4 of the grain ladder (`docs/proposal-grain-ladder.md` §4.3, §7 Q5). `tenant` leaves the `dims` set: a key column in four rollups and a wire dimension nothing ever wrote but its default, out until a writer exists. The minute tier states one dimension set on every minute table: `/v1/figures` serves `grain=minute` at the fleet, class, workload and model cuts (the recompute cells gained `model`), each within the minute tier's measured reach (`minute_retention_days`, seven by default, bucket-aged since landing 3) rather than a 48-hour peg, and `hour` within `hour_retention_days` (365 by default, a literal year until now). The workload scope's description stops naming `unattributed` as `tenant`'s word. |
+| `2fca0e3` | One window grammar, one grain vocabulary, one anchor (`docs/proposal-grain-ladder.md` in the analyzer, §7 ratified 2026-09-02). Every windowed read takes `<N>d`, `<N>h` or `start_ms,end_ms`, anchored to wall now and rounded up to the bucket the span naturally serves; `/v1/figures/bands`' panel-stop special case is gone because there is only one resolver. `/v1/residual/replication` gains `grain` and speaks `minute`/`hour`/`day` like every other bucketed read; its `5min` word is retired, and an explicit minute past its reach refuses by name. `no_pass_yet` leaves the closed set, 25 causes to 24: a relative window no longer needs a pass to exist, so the t0 state is a stamp fact (`pass.frontier_day` null), which `src/data/live/http.ts` turns into the same not-yet-measured state the panels always rendered. The figures read refuses an instance- or holder-scoped explicit minute by name instead of answering 503. |
+| `baa6795` | Two relayed findings close. `InstanceDuplicationData` gains `held_token_ms` — ALL token-time the node held over the window, held-once included — so `within_ranks_token_ms / held_token_ms` is the ratified fraction and the duplication tile stops deputising the across-ranks share (the console's refusal to ratio across registers is why the field exists; the data was always in the table, the read filtered band 1 and never returned the total). And the scope descriptions stop claiming `unattributed` selects the absent workload bucket: the emitted word is `undeclared`, now stated where people copy it, with a check upstream so it stays. |
+| `eb511e6` | The entity-page surfaces land, complete. Scope joins the grammar beside dims on `/v1/figures`, `/v1/figures/bands` and `/v1/distributions/gap`: `workload=` / `instance=` / `holder=` say which slice to answer about (holder wins over instance, being the narrower claim; `unattributed` is a legal workload value naming the absent bucket), so an instance page costs one node's data rather than the fleet's. `dims=instance` rolls a node's ranks together without reopening the triple. `/v1/instances/{instance}/duplication` serves one node's INTERNAL duplication split into `within_ranks_token_ms` (the half with a lever) and `cache_groups_token_ms` (a hybrid model's architecture, never waste); cross-engine mass is absent by construction and `cannot_tell_you` says so. `ReplicationData` grows `cache_group_token_ms` as the third remedy bucket. Roster rows carry `pod`, the slot's current occupant. The gap distribution takes an instance scope at hour grain only; an explicit `grain=day` there refuses by name. And the standing relay ask lands: the bands panel stops `14d`/`48h`/`3h` resolve through the SAME window resolver as the copies read, one anchor authority for the page's two zooms, so the console's stamp-anchored 3 h ask retires. |
+| `27c491f` | The banded-minute ruling lands: `/v1/figures/bands` serves `grain=minute` within the minute tier's 48-hour measured reach, at the fleet, workload and model cuts. Two standing rulings, not gaps: the holder cut at minute grain is refused by name (holder × minute cardinality belongs to the drills), and a window outside minute reach refuses with its bound rather than downgrading. The console's 3 h stop retires its designed refusal and asks an absolute three-hour window anchored on the stamp's window bound; one note relayed rather than worked around: bands still lacks the server-anchored `48h`/`3h` stop tokens replication speaks, and two zoom charts on one page deserve one anchor authority. |
+| `29d6192` | Status becomes the server's word: facts land at ingest, and the verdict is computed at read time against real now with one platform threshold (declared bound widened to 30 min minimum). Roster and holder rows both carry `state: active\|inactive` plus `reason: stopped\|silent\|ungraded` when inactive, both contract-closed; `silent_for_ms` and `threshold_ms` ride the roster rows as hover evidence, numbers never prose. The four-word staleness vocabulary leaves the wire entirely, `state_at_pass` with it, and `state_counts`/`run_states` key by the most specific word (`active`/`stopped`/`silent`/`ungraded`). The console paints from `state` alone and owns how alarming each reason renders. |
+| `2901478` | The bands `limit` param, implemented since `171c9e5` and never declared, joins the document (default 8). One finding reported with the bump, not patched here: the declared `maximum` is 200 while the handler refuses outside 1..=100, the implemented-vs-declared class's third instance, this time on a value bound. |
+| `171c9e5` | The three diff notes from this repo's re-diff, corrected toward the fixture. `BandsData` gains the window echo (`bucket_ms` width, `start_ms`/`end_ms`, `derived` on custom ranges); the holder cut becomes a stated top-N (worst first by window mass, a holder whole or absent) with `population` and `holders_returned` giving "top 8 of 468" its server-stated denominator; the holder dim's wire spelling is the slash-joined full triple (`i03/0/0`). Both `bucket_ms` fields carry real descriptions: response-level is a width, `CopiesBucketJson`'s is a bucket-start instant. Minute and `5min` stay two words because they are two widths (60 s and 300 s); consumers assert on `bucket_ms`, not the word. |
+| `2d0db9e` | The fixture-seam contracts land, shaped to this repo's proposals. `/v1/residual/replication` speaks the panel's window tongue (`14d`/`48h`/`3h` anchored to the emission frontier, absolute for custom, grain stated with its derivation) and carries the four copy bands as named fields, the members table fleet-first, the remedy split, and the exact mean-copies pair. `/v1/figures/bands` serves the five observed gap bands in rows with the cut riding dims, and the gap-unobserved mass as its own figure beside them, never a sixth band; its `3h` stop is refused with `grain_unavailable` by ruling while the 5-minute banded monoid is decided. `CoverageRow` grows the token-weighted basis with the sums that make it mergeable (`token_wsum`/`token_mass`; merge by Σ, never by averaging fractions), absent where an engine has no classified mass. Minute recompute figures gain the workload cut. |
+| `8ce762b` | Five days red, one line wide: `TruncationJson` was referenced by `PlacementData.truncation` and never registered in the emitter's schema list, so the document carried a dangling `$ref` this repo's canary caught and the analyzer's freshness check structurally could not (two identically broken documents agree). Fixed upstream with a resolver pin in the api goldens so the class dies in `cargo test` there. Riding along: `/v1/residual/whales` and `POST /v1/annotations` land with causes 23 to 25 (`unknown_route`, `annotation_invalid`, `bucket_unavailable`); `FiguresData` and `DistributionData` gain a `grain` field stating what was served; the figures `grain` param grows `auto` (the default) and `minute`, with explicit minute served on recompute figures at fleet/class cuts and refused by name elsewhere. |
+| `7113ced` | `x-causes` reaches the stream's 401, so every error response in the document now names which causes can arrive at it. |
+| `4be7dcf` | A stale cursor became an in-band refusal on all six paged surfaces; refused payloads became absent rather than empty, enforced byte-level upstream; `/v1/days` refuses one section rather than the response; four more shapes gained `refused` and all nine now omit the key when absent; `Refusal` gained `requested`. Causes 21 to 23: `limit_invalid`, then `subject_missing`. Three surfaces that returned a `Page` and accepted no cursor now page properly. |
+| `ef6f91a` | Findings 8, 9 and 10 closed. `Stamp` describes `pass`, `raw_horizon` and `analyzer_version`; `Error.bound`/`requested` opened up; every error status declared, 20 error responses to 58, with `x-causes` per response. |
+| `13a50c8` | Pagination on three surfaces; `Refusal` takes the closed cause set and a `bound`; the stream enters the document; `findings` returns a refusal body rather than a readiness placeholder; blocks, holder timeline and marker detail land, completing the drill. Causes 18 to 21: `no_comparable_generation`, `unreadable_generation`, `undefined_denominator`. |
+| `3fe1f53` | First pin. Where the console's contract review was written from. |

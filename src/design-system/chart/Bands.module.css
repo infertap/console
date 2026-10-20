@@ -1,0 +1,86 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.7rem;
+  margin: 0.55rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.swatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  flex: none;
+  align-self: center;
+  border: 1px solid var(--rule);
+}
+
+.legendName {
+  color: var(--graphite);
+}
+
+.comp {
+  margin-top: 0.85rem;
+}
+
+.compLabel {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  margin: 0;
+}
+
+.compBar {
+  display: flex;
+  height: 0.7rem;
+  margin-top: 0.35rem;
+  max-width: 44rem;
+}
+
+.compBar span {
+  display: block;
+  height: 100%;
+  border-right: 1.5px solid var(--plate);
+}
+
+.compBar span:last-child {
+  border-right: 0;
+}
+
+.compLine {
+  display: flex;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  color: var(--graphite);
+  margin-top: 0.2rem;
+  max-width: 44rem;
+}
+
+.compLine span {
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.strip {
+  display: inline-flex;
+  width: 9rem;
+  height: 0.55rem;
+  vertical-align: middle;
+  background: var(--paper-2);
+}
+
+.strip i {
+  display: block;
+  height: 100%;
+  border-right: 1px solid var(--plate);
+}

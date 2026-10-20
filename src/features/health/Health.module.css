@@ -1,0 +1,103 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+.statValue {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 1.125rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.statLabel {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  color: var(--graphite);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
+
+.stamp {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  margin: 0.45rem 0 0;
+}
+
+.stamp b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* The coverage meter: length carries the fraction, the mark carries the floor. */
+.meterCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.meter {
+  display: inline-block;
+  height: 0.45rem;
+  width: 4.5rem;
+  background: var(--paper-3);
+}
+
+.meter > i {
+  display: block;
+  height: 100%;
+  background: var(--seq-4);
+}
+
+.meter[data-low='true'] > i {
+  background: var(--crimson);
+}
+
+.notice {
+  border-left: 3px solid var(--graphite);
+  background: var(--canvas);
+  padding: 0.7rem 0.9rem;
+  margin-top: 0.9rem;
+  max-width: 44rem;
+}
+
+.noticeHead {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  margin: 0 0 0.3rem;
+}
+
+.noticeBody {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.noticeRemedy {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--graphite);
+  margin: 0.4rem 0 0;
+}
+
+.none {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--graphite);
+  margin: 0;
+  max-width: 52rem;
+}
+
+.chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}

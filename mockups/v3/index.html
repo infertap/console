@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Document v3 · infertap console</title>
+<link rel="stylesheet" href="../assets/console-v2.css">
+<link rel="stylesheet" href="../assets/console-v3.css">
+</head>
+<!--
+  V3.1 PROPOSAL, LEVEL 0 — THREE SURFACES, NUMBERS-ONLY GLASS.
+
+  Revision ruling (client direction, 2026-08-26): NO SENTENCES ON GLASS. The
+  gauges tell the story: KPI tiles, charts, band tables, working tables. Words
+  survive only as labels, units, provenance chips and hover definitions, which
+  is the words-on-glass law read strictly. Every sentence the v3.0 draft carried
+  moved into an info hover or died.
+
+  Second ruling: FLEET IS A CUT, NOT THE PRODUCT. Workload / instance / model
+  cuts are the primary working surface. Each value section carries cut buttons
+  and a working table (one row per cut member, shape as a 100%-stacked strip);
+  clicking a row retargets the chart. URL is state.
+
+  Third ruling: THE THRASH LENS IS MINUTE-CAPABLE. Window control offers
+  14 d · day, 48 h · hour, 3 h · 5-min. The 3 h view draws the ‡ marker, so
+  "did my change fix the churn" is answerable within one tap seal, not one day.
+
+  Sections: repeat compute (+ thrash lens) · change ledger · placement · trust.
+  Cut from v2: the standalone gap curve (a drill now), blocks-by-mass (a drill),
+  the max-k residual scalar (superseded by token-hours).
+  DATA IS SYNTHETIC SCAFFOLDING (marked by the mockbar), derived from the v2
+  world so cross-page arithmetic agrees where quantities coincide.
+-->
+<body>
+<div class="app">
+  <div class="main">
+    <div class="content">
+      <header><h1 class="ctxbar" id="ctx"></h1></header>
+      <!-- v3.1: the recompute section is a plate like every other. The v2 rule
+           that the hero floats unboxed belonged to the article voice, which the
+           numbers-only ruling retired: a dashboard is panelled, uniformly. -->
+      <section class="sec" id="waste"><div id="s-waste"></div></section>
+      <!-- v3.2: "the change ledger" dissolved as a section. Markers render on
+           the metric charts themselves and attribution is an interaction there —
+           the trend renders exactly once, so a second recompute series was a
+           law violation wearing a section title. -->
+      <section class="sec" id="placement"><div id="s-placement"></div></section>
+      <section class="sec" id="trust"><div id="s-trust"></div></section>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data-v2.js"></script>
+<script src="../assets/console-v2.js"></script>
+<script>
+/* ══ v3 definitions join the hover vocabulary. Sentences live HERE, not on glass. ══ */
+DEFS.thrash = {
+  measures: "repeat-compute token mass, decomposed by how long the block had been evicted before the fleet paid to store it again. Short bands are churn; long bands are coincidental re-use a larger cache would not have held.",
+  computed: "the gap is observed per store (at_ms minus the observed prior close); mass lands in a fixed band at the instant the recompute landed, which is when the cost was paid. Bands are fixed fleet to fleet, so the figure compares.",
+  basis: "token-weighted · sums, so any cut and any window merge exactly · bands are fixed fleet to fleet, so the figure compares",
+  bound: "the 72 h lookback right-censors gaps: mass with no observed prior close (first-seen, or gone longer than 72 h — indistinguishable by construction) renders as the gap-unobserved gauge, beside the bands and never in the stack. No recovery claim: what a larger cache would have held is a counterfactual and stays off glass."
+};
+DEFS.ledger = {
+  measures: "both registers as one contiguous day with every marker on it. A marker is a declared deployment (operator-recorded: a label and an instant, per fleet) or a system-recorded measurement change; the platform infers no blast radius. Scope is your lens — cut to the workload you deployed to, and the selected marker's equal spans shade on that series.",
+  computed: "minute-bucket sums from the streamed producer. Before and after are means over the shaded spans; the after span may still be filling for a recent marker. Deltas are neutral ink with a sign: whether a movement is good news is a conclusion the meter has no basis for.",
+  basis: "event-time buckets · late segments correct by addition, identity-scoped · a marker that breaks the series splits the line and refuses its comparison: rows either side are not one quantity",
+  bound: "arrives in tap-seal batches; this fleet seals at 5 min, so the edge trails the wall clock by one seal. Minute buckets are not minute latency."
+};
+DEFS.replication = {
+  measures: "cached token-hours held in more than one place at once, decomposed by how many copies existed. The cross-engine share is routing and affinity; the within-engine share is that engine's own eviction pressure.",
+  computed: "residency intervals per content identity, integrated over time; a token-hour lands in the band of its simultaneous copy count.",
+  basis: "time integral · sums across days, workloads and fleets, unlike a daily maximum · never refuses a window total",
+  bound: "cross-engine comparability requires a shared model group; non-comparable stores are excluded, never counted as unique"
+};
+DEFS.pairs = {
+  measures: "which engine pairs co-held the same content, and for how many token-hours per day.",
+  computed: "pair-observed co-residency integrated per day; the matrix sums rank pairs to engine pairs. A crimson corner is a cell under 75% pair-observed time.",
+  basis: "day grain deliberately: pair count is quadratic in fleet, minutes live on the linear fleet series",
+  bound: "top 12 engines of 120 by pair mass; identity never enters a rollup — it lives one drill down, inside the raw window"
+};
+
+/* ══ the v3 world (scaffolding; totals agree with the v2 ledger) ════════════ */
+const R3 = rng(20260826);
+const DAYS14 = Array.from({ length: 14 }, (_, i) => md(dayDate(76 + i)));
+const DAILY_WASTE = WASTE_FULL / 14;
+
+/* gap bands: darkest = shortest = the churn end, anchored at the baseline */
+const GAP_BANDS = [
+  { key: "<1m",  label: "under 1 min",  color: "#0c4744" },
+  { key: "1-10", label: "1 to 10 min",  color: "#1e625d" },
+  { key: "10-60",label: "10 to 60 min", color: "#5c9992" },
+  { key: "1h-1d",label: "1 h to 1 day", color: "#86b5ae" },
+  { key: ">1d",  label: "over 1 day",   color: "#d2e3df" }
+];
+/* cut members: share of fleet waste + a band PROFILE. rag-batch is the churner. */
+const FLEET_PROFILE = [0.09, 0.53, 0.21, 0.12, 0.05];
+const CUTS = {
+  fleet: [{ key: "fleet", label: "fleet", share: 1, profile: FLEET_PROFILE, cov: COV_FULL }],
+  workload: [
+    { key: "rag-batch",     label: "rag-batch",     share: 0.41, profile: [0.14, 0.61, 0.15, 0.07, 0.03], cov: 0.991 },
+    { key: "chat-prod",     label: "chat-prod",     share: 0.38, profile: [0.06, 0.50, 0.24, 0.14, 0.06], cov: 0.988 },
+    { key: "code-assist",   label: "code-assist",   share: 0.12, profile: [0.04, 0.38, 0.30, 0.19, 0.09], cov: 0.972 },
+    { key: "unattributed",  label: "unattributed",  share: 0.09, profile: [0.08, 0.45, 0.25, 0.15, 0.07], cov: 0.941 }
+  ],
+  instance: [
+    { key: "i03/0", label: "i03 / 0 / g0", share: 0.11, profile: [0.16, 0.63, 0.13, 0.06, 0.02], cov: 0.995 },
+    { key: "i01/1", label: "i01 / 1 / g0", share: 0.09, profile: [0.13, 0.60, 0.16, 0.08, 0.03], cov: 0.990 },
+    { key: "i04/0", label: "i04 / 0 / g0", share: 0.08, profile: [0.12, 0.58, 0.18, 0.09, 0.03], cov: 0.987 },
+    { key: "i00/2", label: "i00 / 2 / g0", share: 0.07, profile: [0.07, 0.51, 0.23, 0.13, 0.06], cov: 0.993 },
+    { key: "i07/1", label: "i07 / 1 / g1", share: 0.06, profile: [0.05, 0.44, 0.28, 0.16, 0.07], cov: 0.981 },
+    { key: "i02/0", label: "i02 / 0 / g0", share: 0.06, profile: [0.06, 0.47, 0.26, 0.14, 0.07], cov: 0.974 },
+    { key: "i11/3", label: "i11 / 3 / g1", share: 0.05, profile: [0.04, 0.40, 0.30, 0.18, 0.08], cov: 0.968 },
+    { key: "i05/2", label: "i05 / 2 / g0", share: 0.05, profile: [0.05, 0.43, 0.28, 0.17, 0.07], cov: 0.989 }
+  ],
+  model: [
+    { key: "llama-70b", label: "llama-3-70b", share: 0.63, profile: [0.11, 0.56, 0.19, 0.10, 0.04], cov: 0.992 },
+    { key: "qwen-32b",  label: "qwen-32b",    share: 0.31, profile: [0.05, 0.46, 0.27, 0.15, 0.07], cov: 0.983 },
+    { key: "undeclared",label: "undeclared",  share: 0.06, profile: [0.07, 0.48, 0.25, 0.14, 0.06], cov: 0.930 }
+  ]
+};
+/* time helpers: every axis label is a raw UTC instant, never a relative offset.
+   A reader should read a clock, not do arithmetic against "now". */
+const MIN_MS = 60000, HOUR_MS2 = 3600000, DAY_MS2 = 86400000;
+const dtMs = s => new Date(s + ":00Z").getTime();
+const hhmm = ms => { const d = new Date(ms); return String(d.getUTCHours()).padStart(2, "0") + ":" + String(d.getUTCMinutes()).padStart(2, "0"); };
+const mdOf = ms => new Date(ms).toISOString().slice(5, 10);
+/* hour-grain tick: midnights carry the date, other hours the clock */
+const hourTick = ms => { const d = new Date(ms); return d.getUTCHours() === 0 ? mdOf(ms) : String(d.getUTCHours()).padStart(2, "0") + ":00"; };
+
+/* windows: cols × per-col fleet mass. The 3 h view carries the ‡ marker. */
+const BASE48 = dtMs("2026-08-01T15:00");   /* 48 h ending 08-03 15:00Z */
+const BASE3H = dtMs("2026-08-03T12:00");   /* 3 h: 12:00Z → 15:00Z */
+const WINS = {
+  "14d": { label: "14 d · day",    grain: "day",   n: 14, perCol: DAILY_WASTE,      cols: i => DAYS14[i], tickEvery: 2, unitName: "day",   rangeLabel: "14 d",
+           startMs: dtMs("2026-07-21T00:00"), spanMs: 14 * DAY_MS2 },
+  "48h": { label: "48 h · hour",   grain: "hour",  n: 48, perCol: DAILY_WASTE / 24, cols: i => hourTick(BASE48 + i * HOUR_MS2), tickEvery: 6, unitName: "h", rangeLabel: "48 h",
+           startMs: BASE48, spanMs: 48 * HOUR_MS2 },
+  "3h":  { label: "3 h · 5 min",   grain: "5 min", n: 36, perCol: DAILY_WASTE / 288, cols: i => hhmm(BASE3H + i * 5 * MIN_MS), tickEvery: 6, unitName: "5 min", rangeLabel: "3 h",
+           startMs: BASE3H, spanMs: 3 * HOUR_MS2 }
+};
+let CUT = qs("cut") || "fleet", WIN = qs("win") || "14d", SEL = qs("sel") || null;
+const normDT = s => s && s.length === 10 ? s + "T00:00" : s;
+let CR_FROM = normDT(qs("from")) || "2026-08-03T09:00", CR_TO = normDT(qs("to")) || "2026-08-03T14:00";
+/* placement's own window state: a control changes only its own panel */
+let PWIN = qs("pwin") || "48h",
+    PFROM = normDT(qs("pfrom")) || "2026-08-03T09:00", PTO = normDT(qs("pto")) || "2026-08-03T14:00";
+
+/* custom range: DATE AND TIME in, grain DERIVED — the finest grain whose
+   retention covers the range start and whose bucket count still renders.
+   Mock retention ladder: 5-min lives 7 d (streamed producer), hourly 1 y,
+   daily 5 y. Sub-13-hour spans inside the 5-min retention answer at 5-min
+   buckets; up to 6 days answers hourly; everything else daily. */
+function winDesc(winKey, from, to) {
+  if (winKey !== "custom") return WINS[winKey];
+  let A = dtMs(from || CR_FROM), B = dtMs(to || CR_TO);
+  if (A > B) { const t = A; A = B; B = t; }
+  if (B - A < 10 * MIN_MS) B = A + 10 * MIN_MS;
+  const spanMin = (B - A) / MIN_MS, spanDays = (B - A) / DAY_MS2;
+  const ageDays = (new Date(TODAY + "T00:00:00Z").getTime() - A) / DAY_MS2;
+  const rangeLabel = mdOf(A) === mdOf(B)
+    ? mdOf(A) + " " + hhmm(A) + "→" + hhmm(B)
+    : mdOf(A) + "→" + mdOf(B);
+  if (spanMin <= 780 && ageDays <= 7) {
+    const n5 = Math.max(2, Math.ceil(spanMin / 5));
+    return {
+      label: "custom", grain: "5 min", n: n5, perCol: DAILY_WASTE / 288,
+      cols: i => hhmm(A + i * 5 * MIN_MS),
+      tickEvery: Math.max(3, Math.round(spanMin / 5 / 8)), unitName: "5 min", rangeLabel,
+      startMs: A, spanMs: n5 * 5 * MIN_MS, derived: "range × retention"
+    };
+  }
+  if (spanDays <= 6.01 && ageDays <= 365) {
+    const nH = Math.max(1, Math.ceil(spanMin / 60));
+    return {
+      label: "custom", grain: "hour", n: nH, perCol: DAILY_WASTE / 24,
+      cols: i => { const t = A + i * HOUR_MS2; const hh = new Date(t).getUTCHours(); return hh === 0 ? mdOf(t) : hh + "h"; },
+      tickEvery: spanDays > 2 ? 12 : 6, unitName: "h", rangeLabel,
+      startMs: A, spanMs: nH * HOUR_MS2,
+      derived: spanMin <= 780 ? "5-min retention exceeded" : "range × retention"
+    };
+  }
+  const nD = Math.max(1, Math.ceil((B - A) / DAY_MS2));
+  return {
+    label: "custom", grain: "day", n: nD, perCol: DAILY_WASTE,
+    cols: i => mdOf(A + i * DAY_MS2),
+    tickEvery: Math.max(1, Math.ceil(nD / 10)), unitName: "day", rangeLabel,
+    startMs: A, spanMs: nD * DAY_MS2,
+    derived: ageDays > 365 ? "hourly retention exceeded" : "range × retention"
+  };
+}
+function selMember() {
+  const list = CUTS[CUT];
+  return list.find(m => m.key === SEL) || list[0];
+}
+/* series: per-col totals × profile, drifting; in the 3 h view the short bands
+   move at the marker — down in the win scenario, up in the regression. */
+function seriesFor(member, winKey, scenario) {
+  const w = winDesc(winKey, CR_FROM, CR_TO);
+  const bucketMs = w.spanMs / w.n;
+  let seed = 1000 + member.key.length * 31;
+  for (const c of winKey + (winKey === "custom" ? CR_FROM + CR_TO : "")) seed += c.charCodeAt(0) * 7;
+  const r = rng(seed);
+  const affMs = LMARKS.find(x => x.id === "affinity").tMs;
+  const skewMs = LMARKS.find(x => x.id === "skew").tMs;
+  const affScope = member.key === "rag-batch" ? 1 : member.key === "fleet" ? 0.5 : 0;
+  const rows = [];
+  for (let i = 0; i < w.n; i++) {
+    const t = w.startMs + (i + 0.5) * bucketMs;
+    let total = w.perCol * member.share * (0.82 + r() * 0.4);
+    if (t >= skewMs) total *= 1.08;                              /* ‖ measurement shift */
+    const drift = w.unitName === "day" && w.n >= 10 ? (i - w.n / 2) * 0.012 * (14 / w.n) : 0;
+    let shift = 0;
+    if (affScope && t >= affMs) {                                /* ‡ settles in ~12 min */
+      const k = Math.min(1, (t - affMs) / (12 * MIN_MS));
+      shift = (scenario.key === "reg" ? 0.22 : -0.35) * k * affScope;
+    }
+    rows.push(member.profile.map((p, b) => {
+      const adj = b <= 1 ? p * (1 + shift) + drift : Math.max(0.005, p * (1 - shift * 0.4) - drift * 0.66);
+      return total * adj;
+    }));
+  }
+  return { w, rows, bandTotals: member.profile.map((_, b) => rows.reduce((a, x) => a + x[b], 0)) };
+}
+
+/* the change ledger: ONE CONTIGUOUS 24 H SERIES with the markers on it.
+   V1 HONESTY RULING: the platform does not infer blast radius. A marker is
+   either a DECLARED deployment (operator-recorded: a label and an instant,
+   per fleet) or a SYSTEM-RECORDED measurement change (parameter, analyzer).
+   No observed cohort clustering yet — engine_version per run is already in
+   the stream, so cohort markers are a future DERIVATION, not new collection.
+   Scope is therefore the OPERATOR'S LENS: a cut control on this panel; the
+   markers are fleet instants drawn on whichever scope is being read. */
+const LEDGER_N = 288, LEDGER_START = dtMs("2026-08-02T14:40");
+const LMARKS = [
+  { id: "skew",     idx: 24,  dagger: "‖", t: "08-02 16:40Z", tMs: dtMs("2026-08-02T16:40"), label: "delta_skew 1000 to 750",
+    kind: "system · classification parameter", breaks: true },
+  { id: "engine",   idx: 222, dagger: "†", t: "09:12Z", tMs: dtMs("2026-08-03T09:12"), label: "engine 0.9.4 rollout",
+    kind: "declared · deploy", breaks: false },
+  { id: "affinity", idx: 284, dagger: "‡", t: "14:20Z", tMs: dtMs("2026-08-03T14:20"), label: "router affinity weights 0.3 to 0.6",
+    kind: "declared · deploy", breaks: false }
+];
+let LSEL = qs("mk") || "affinity", PMK = qs("pmk") || "affinity";
+const SCOPE_OF = { fleet: "fleet", "rag-batch": "rag", "chat-prod": "chat", "code-assist": "code", unattributed: "unatt" };
+function markerMarks(w) {
+  return LMARKS.map(mk => ({ ...mk, frac: (mk.tMs - w.startMs) / w.spanMs }))
+    .filter(m => m.frac >= 0 && m.frac <= 1);
+}
+function spanFracs(selId, w) {
+  const mk = LMARKS.find(x => x.id === selId);
+  const bucketMs = w.spanMs / w.n;
+  if (!mk || mk.breaks || bucketMs > HOUR_MS2) return null;
+  if (mk.tMs < w.startMs || mk.tMs > w.startMs + w.spanMs) return null;
+  const f = t => (t - w.startMs) / w.spanMs;
+  return { b0: Math.max(0, f(mk.tMs - 60 * MIN_MS)), m: f(mk.tMs), a1: Math.min(1, f(mk.tMs + 60 * MIN_MS)) };
+}
+/* a custom range row: dates and times in, grain OUT, stamped. Each panel that
+   offers one holds its own state — a control changes only its own panel. */
+function rangeRow(fromVal, toVal, setFrom, setTo, w) {
+  const row = h("div", { class: "rangerow" });
+  row.appendChild(h("span", { class: "cut__l" }, "range"));
+  [[fromVal, setFrom, "from"], [toVal, setTo, "to"]].forEach(([val, set, lab]) => {
+    const inp = h("input", { class: "rangein", type: "datetime-local", value: val,
+      min: "2021-08-04T00:00", max: TODAY + "T23:59", step: "300", "aria-label": lab });
+    inp.addEventListener("change", () => { if (inp.value) { set(inp.value); syncURL(); render(); } });
+    row.appendChild(inp);
+  });
+  const gs = h("span", { class: "stamp" });
+  gs.innerHTML = "grain <b>" + w.grain + "</b> · " + w.derived;
+  row.appendChild(gs);
+  return row;
+}
+/* the attribution sub-region a metric panel carries: marker index (declared
+   deploys + system-recorded changes), and the selected marker's before/after
+   card. BOTH registers appear as numbers — beside, never on one axis — with
+   the panel's own register leading. The card computes at event grain, so it
+   answers regardless of the chart's displayed grain. */
+function attribution(panel, o) {
+  const sub = h("div", { class: "blk__sub" });
+  const hd = h("div", { class: "blk__head" });
+  /* Ruled 2026-08-28: role head on glass; "marker attribution" is the hover title. */
+  hd.appendChild(h("h4", { class: "plate__t" }, "around each deploy · " + o.scopeLabel));
+  hd.appendChild(info("ledger", "marker attribution"));
+  sub.appendChild(hd);
+  const row = h("div", { class: "anchors", style: "margin:0 0 0.8rem" });
+  LMARKS.slice().sort((a, b) => b.tMs - a.tMs).forEach(mk => {
+    const a = h("button", { class: "anchor", type: "button", "aria-pressed": String(mk.id === o.selId), style: "cursor:pointer" });
+    a.innerHTML = "<b>" + mk.dagger + "</b> " + mk.t + " · " + mk.label;
+    a.addEventListener("click", () => { o.setSel(mk.id); syncURL(); render(); });
+    row.appendChild(a);
+  });
+  sub.appendChild(row);
+  const sel = LMARKS.find(x => x.id === o.selId) || LMARKS[2];
+  if (sel.breaks) {
+    const chips = h("div", { style: "display:flex;gap:0.4rem;flex-wrap:wrap" });
+    chips.appendChild(chipEl("indeterminate", "series breaks at " + sel.dagger, "not one quantity"));
+    chips.appendChild(chipEl("unexamined", "before/after refused", "separate eras"));
+    sub.appendChild(chips);
+    panel.appendChild(sub);
+    return;
+  }
+  const scope = LSCOPES.find(s => s.key === o.scopeKey) || LSCOPES[0];
+  const D = ledgerDay(SC, scope);
+  const idx = Math.round((sel.tMs - LEDGER_START) / (5 * MIN_MS));
+  const b0 = Math.max(0, idx - 12), a1 = Math.min(LEDGER_N - 1, idx + 12);
+  const mean = (a, s, e) => { let t = 0, c = 0; for (let i = s; i < e; i++) { t += a[i]; c++; } return t / c; };
+  const rcB = mean(D.rc, b0, idx), rcA = mean(D.rc, idx + 1, a1 + 1);
+  const duB = mean(D.du, b0, idx), duA = mean(D.du, idx + 1, a1 + 1);
+  const rcD = (rcA - rcB) / rcB, duD = (duA - duB) / duB;
+  const afterMin = (a1 - idx) * 5;
+  const fmtD = d => Math.abs(d) < 0.03 ? "±0" : (d > 0 ? "+" : "−") + pct(Math.abs(d), 1);
+  /* a percent without its base is half a claim: the rates ride the hover */
+  const rcTip = Math.round(rcB) + " → " + Math.round(rcA) + " tok/min";
+  const duTip = duB.toFixed(1) + " → " + duA.toFixed(1) + " tok-h/min";
+  const prim = o.primary === "du"
+    ? [[fmtD(duD), "duplication · after vs before", true, duTip], [fmtD(rcD), "recompute", false, rcTip]]
+    : [[fmtD(rcD), "recompute · after vs before", true, rcTip], [fmtD(duD), "duplication", false, duTip]];
+  sub.appendChild(kpis(prim.concat([["60 min", "before span"],
+    [afterMin + " min", afterMin < 60 ? "after span · still filling" : "after span"]])));
+  panel.appendChild(sub);
+}
+/* the operator's scope lens: baseline rates plus how visibly each marker's
+   effect lands in that scope (scaffolding for the mock's series shapes) */
+const LSCOPES = [
+  { key: "fleet", label: "fleet",        rc: 207, du: 8.1, aff: 0.42, eng: 0.30 },
+  { key: "rag",   label: "rag-batch",    rc: 85,  du: 4.2, aff: 1,    eng: 0.30 },
+  { key: "chat",  label: "chat-prod",    rc: 79,  du: 2.5, aff: 0.05, eng: 0.30 },
+  { key: "code",  label: "code-assist",  rc: 25,  du: 0.9, aff: 0.05, eng: 0.30 },
+  { key: "unatt", label: "unattributed", rc: 18,  du: 0.5, aff: 0.05, eng: 0.30 }
+];
+function ledgerDay(sc, scope) {
+  const r = rng(6011 + scope.key.length * 13);
+  const rc = [], du = [];
+  for (let i = 0; i < LEDGER_N; i++) {
+    const hh2 = new Date(LEDGER_START + i * 5 * MIN_MS).getUTCHours();
+    const diurnal = 1 + 0.16 * Math.sin((hh2 - 8) / 24 * 2 * Math.PI);
+    let rcv = scope.rc * diurnal * (1 + (r() - 0.5) * 0.16);
+    let duv = scope.du * diurnal * (1 + (r() - 0.5) * 0.22);
+    if (i >= 24) rcv *= 1.16;                                    /* ‖ measurement shift, every scope */
+    if (i >= 222) { const e = Math.exp(-(i - 222) / 3);           /* † rolling restarts, fleet-wide transient */
+      rcv *= 1 + 0.4 * scope.eng * e; duv *= 1 - 0.45 * scope.eng * e; }
+    if (i >= 284) { const k = Math.min(1, (i - 284) / 2.4);       /* ‡ the change under test */
+      rcv *= 1 + k * (sc.rc - 1) * scope.aff; duv *= 1 + k * (sc.du - 1) * scope.aff; }
+    rc.push(rcv); du.push(duv);
+  }
+  return { rc, du };
+}
+const SCENARIOS = {
+  win: { key: "win", label: "affinity win", rc: 0.985, du: 0.62 },
+  reg: { key: "reg", label: "regression",   rc: 1.06,  du: 1.31 }
+};
+let SC = SCENARIOS[qs("sc") || "win"] || SCENARIOS.win;
+
+/* placement */
+const COPY_BANDS = [
+  { key: "2",  label: "2 copies",  color: "#7a4c0c" },
+  { key: "34", label: "3 to 4",    color: "#b8791a" },
+  { key: "58", label: "5 to 8",    color: "#d3a852" },
+  { key: "9+", label: "9 or more", color: "#eddcba" }
+];
+const DUP_TH_DAY = 11400, CACHED_TH_DAY = 250600, MEAN_COPIES = 1.06;
+const PLACE_CUTS = [
+  { key: "fleet",        label: "fleet",        share: 1,    profile: [0.58, 0.27, 0.11, 0.04], cross: 0.71, pairs: 63, weakest: 0.81 },
+  { key: "rag-batch",    label: "rag-batch",    share: 0.52, profile: [0.44, 0.31, 0.17, 0.08], cross: 0.86, pairs: 22, weakest: 0.81 },
+  { key: "chat-prod",    label: "chat-prod",    share: 0.31, profile: [0.68, 0.24, 0.07, 0.01], cross: 0.62, pairs: 28, weakest: 0.88 },
+  { key: "code-assist",  label: "code-assist",  share: 0.11, profile: [0.79, 0.17, 0.04, 0.00], cross: 0.41, pairs: 9,  weakest: 0.79 },
+  { key: "unattributed", label: "unattributed", share: 0.06, profile: [0.74, 0.20, 0.05, 0.01], cross: 0.55, pairs: 4,  weakest: 0.68 }
+];
+let PSEL = qs("psel") || "fleet";
+const placeSel = () => PLACE_CUTS.find(p => p.key === PSEL) || PLACE_CUTS[0];
+function replSeriesFor(member, w) {
+  const r = rng(9977 + member.key.length + w.n * 7);
+  const bucketMs = w.spanMs / w.n;
+  return Array.from({ length: w.n }, (_, i) => {
+    const hh = new Date(w.startMs + (i + 0.5) * bucketMs).getUTCHours();
+    const diurnal = 1 + 0.35 * Math.sin((hh - 8) / 24 * 2 * Math.PI);
+    const total = DUP_TH_DAY * member.share * (bucketMs / DAY_MS2) * diurnal * (0.9 + r() * 0.2);
+    return member.profile.map(p => total * Math.max(0.004, p + (r() - 0.5) * 0.02));
+  });
+}
+const ENGINES = Array.from({ length: 12 }, (_, i) => "i" + String(i).padStart(2, "0"));
+const PAIRS = [];
+(function () {
+  const r = rng(9091);
+  for (let a = 0; a < 12; a++) for (let b = a + 1; b < 12; b++) {
+    const hot = (a < 3 && b < 5);
+    PAIRS.push({ a, b, th: hot ? 40 + r() * 72 : r() * 14, impaired: r() < 0.06 });
+  }
+})();
+const PAIR_PEAK = Math.max(...PAIRS.map(p => p.th));
+const WHALES = [
+  { id: "b7f2…9c1", th: 1840, holders: 9, workload: "rag-batch" },
+  { id: "44aa…d02", th: 1212, holders: 6, workload: "chat-prod" },
+  { id: "e310…77b", th: 760,  holders: 5, workload: "rag-batch" },
+  { id: "0d9c…4e8", th: 431,  holders: 4, workload: "unattributed" }
+];
+
+/* ══ shared furniture ═══════════════════════════════════════════════════════ */
+function kpis(pairs) {
+  const g = h("div", { class: "kpis" });
+  pairs.forEach(([v, k, wide, tip]) => {
+    const d = h("div", { class: "kpi" + (wide ? " kpi--wide" : "") });
+    if (tip) d.setAttribute("title", tip);
+    d.appendChild(h("div", { class: "kpi__v" }, v));
+    d.appendChild(h("div", { class: "kpi__k" }, k));
+    g.appendChild(d);
+  });
+  return g;
+}
+function cutBar(groups) {
+  const bar = h("div", { style: "display:flex;flex-wrap:wrap;gap:1.25rem;align-items:center;margin:0.6rem 0 0.8rem" });
+  groups.forEach(([label, opts, current, onPick]) => {
+    const g = h("div", { style: "display:flex;align-items:center" });
+    g.appendChild(h("span", { class: "cut__l" }, label));
+    const c = h("div", { class: "cut" });
+    opts.forEach(([k, text]) => {
+      const b = h("button", { class: "cut__b", type: "button" }, text);
+      b.setAttribute("aria-pressed", String(k === current));
+      b.addEventListener("click", () => { onPick(k); syncURL(); render(); });
+      c.appendChild(b);
+    });
+    g.appendChild(c);
+    bar.appendChild(g);
+  });
+  return bar;
+}
+function syncURL() {
+  const u = new URLSearchParams(location.search);
+  u.set("cut", CUT); u.set("win", WIN); u.set("sc", SC.key); u.set("psel", PSEL);
+  u.set("from", CR_FROM); u.set("to", CR_TO); u.set("mk", LSEL); u.set("pmk", PMK);
+  u.set("pwin", PWIN); u.set("pfrom", PFROM); u.set("pto", PTO);
+  if (SEL) u.set("sel", SEL); else u.delete("sel");
+  history.replaceState(null, "", "?" + u);
+}
+function blkHead(text, extras) {
+  const r = h("div", { class: "blk__head" });
+  r.appendChild(h("h4", { class: "plate__t" }, text));
+  (extras || []).forEach(x => r.appendChild(x));
+  return r;
+}
+function compRegister(mount, o) {
+  const box = h("div", { style: "margin-top:0.85rem" });
+  box.appendChild(h("p", { class: "pv" }, o.label));
+  const bar = h("div", { class: "compbar" });
+  const labs = h("div", { class: "compbar-l" });
+  o.shares.forEach((s, k) => {
+    const tt = o.bands[k].label + " · " + o.titles[k] + " · " + pct(s, 1);
+    const seg = h("span", { title: tt });
+    seg.style.width = (s * 100).toFixed(2) + "%";
+    seg.style.background = o.bands[k].color;
+    bar.appendChild(seg);
+    const l = h("span", { title: tt }, s >= 0.05 ? pct(s, 1) : "");
+    l.style.width = (s * 100).toFixed(2) + "%";
+    labs.appendChild(l);
+  });
+  box.appendChild(bar);
+  box.appendChild(labs);
+  mount.appendChild(box);
+}
+function stripEl(profile, bands) {
+  const s = h("span", { class: "strip" });
+  profile.forEach((p, k) => {
+    const i = h("i");
+    i.style.width = (p * 100).toFixed(1) + "%";
+    i.style.background = bands[k].color;
+    s.appendChild(i);
+  });
+  return s;
+}
+
+/* ══ chart builders ═════════════════════════════════════════════════════════ */
+function axisY(g, W, H, pad, max, unit, fmt) {
+  [0.5, 1].forEach(f => {
+    const y = H - pad.b - (H - pad.t - pad.b) * f;
+    g.appendChild(el("line", { x1: pad.l, x2: W - pad.r, y1: y, y2: y, stroke: T("rule-2"), "stroke-width": 1 }));
+    const lab = el("text", { x: pad.l - 6, y: y + 3, "text-anchor": "end", fill: T("graphite"),
+      "font-family": "inherit", "font-size": 10 });
+    lab.textContent = (fmt || compact)(max * f);
+    g.appendChild(lab);
+  });
+  const u = el("text", { x: 2, y: pad.t - 6, "text-anchor": "start", fill: T("graphite"),
+    "font-family": "inherit", "font-size": 9, "letter-spacing": "0.1em" });
+  u.textContent = unit.toUpperCase();
+  g.appendChild(u);
+}
+function bandStack(mount, o) {
+  const W = 1000, H = o.height || 230, pad = { t: 18, b: 22, l: 46, r: 8 };
+  const iw = (W - pad.l - pad.r) / o.rows.length;
+  const totals = o.rows.map(r => r.reduce((a, x) => a + x, 0));
+  const max = Math.max(...totals) * 1.08;
+  const sy = v => (H - pad.t - pad.b) * (v / max);
+  const svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": o.title });
+  axisY(svg, W, H, pad, max, o.unit, o.fmt);
+  const FX = f => pad.l + f * (W - pad.l - pad.r);
+  if (o.spans) {   /* the selected marker's equal spans, behind the bars */
+    svg.appendChild(el("rect", { x: FX(o.spans.b0), y: pad.t, width: FX(o.spans.m) - FX(o.spans.b0),
+      height: H - pad.t - pad.b, fill: T("graphite"), "fill-opacity": 0.1 }));
+    svg.appendChild(el("rect", { x: FX(o.spans.m), y: pad.t, width: FX(o.spans.a1) - FX(o.spans.m),
+      height: H - pad.t - pad.b, fill: T("ink"), "fill-opacity": 0.06 }));
+  }
+  const bucketName = (o.unit.split("/")[1] || "bucket").trim();
+  const readout = h("div", { class: "hoverline" }, " ");
+  const marks = [];
+  const clear = () => {
+    marks.forEach(m => { m.el.setAttribute("fill-opacity", "1"); m.el.removeAttribute("stroke"); });
+    readout.innerHTML = " ";
+  };
+  o.rows.forEach((row, t) => {
+    let y = H - pad.b;
+    const x = pad.l + t * iw;
+    const g = el("g");
+    row.forEach((v, k) => {
+      const hgt = Math.max(0, sy(v) - 1.5);
+      y -= sy(v);
+      const rect = el("rect", { x: x + 1, y: y + 0.75, width: Math.max(1, iw - 2.5), height: hgt,
+        fill: o.bands[k].color });
+      marks.push({ el: rect, band: k });
+      rect.addEventListener("mouseenter", () => {
+        marks.forEach(m => m.el.setAttribute("fill-opacity", m.band === k ? "1" : "0.5"));
+        rect.setAttribute("stroke", T("ink"));
+        rect.setAttribute("stroke-width", "1.25");
+        readout.innerHTML = o.cols(t) + " · <b>" + o.bands[k].label + "</b> · <b>" +
+          (o.fmt || compact)(v) + "</b> " + o.unitShort + " · <b>" +
+          pct(v / totals[t], 1) + "</b> of the " + bucketName;
+      });
+      rect.addEventListener("mouseleave", clear);
+      g.appendChild(rect);
+    });
+    svg.appendChild(g);
+    if (t % (o.tickEvery || 2) === 0) {
+      const lab = el("text", { x: x + iw / 2, y: H - 6, "text-anchor": "middle", fill: T("graphite"),
+        "font-family": "inherit", "font-size": 9 });
+      lab.textContent = o.cols(t);
+      svg.appendChild(lab);
+    }
+  });
+  (o.markers || []).forEach(mk => {   /* markers ride every metric chart */
+    const x = FX(mk.frac);
+    if (mk.breaks) svg.appendChild(el("rect", { x: x - 2, y: pad.t, width: 4,
+      height: H - pad.t - pad.b, fill: T("pencil"), "fill-opacity": 0.5 }));
+    svg.appendChild(el("line", { x1: x, x2: x, y1: pad.t - 4, y2: H - pad.b, stroke: T("ink"),
+      "stroke-width": mk.id === o.selId ? 1.5 : 1, "stroke-dasharray": "1 3" }));
+    const ml = el("text", { x: x + 4, y: pad.t + 4, fill: T("ink"), "font-family": "inherit",
+      "font-size": 10, "font-weight": mk.id === o.selId ? 700 : 500 });
+    ml.textContent = mk.dagger + (mk.id === o.selId ? " " + mk.t : "");
+    svg.appendChild(ml);
+  });
+  const box = h("div", { class: "chart chartbox", style: "font-family:var(--mono)" });
+  box.appendChild(svg);
+  mount.appendChild(box);
+  mount.appendChild(readout);
+}
+function pairMatrix(mount) {
+  const n = 12, cell = 30, gap = 2, pad = 34;
+  const W = pad + n * (cell + gap), H = pad + n * (cell + gap);
+  const svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img",
+    "aria-label": "Engine-pair co-residency, token-hours per day, lower triangle." });
+  ENGINES.forEach((e, i) => {
+    const lx = el("text", { x: pad + i * (cell + gap) + cell / 2, y: pad - 8, "text-anchor": "middle",
+      fill: T("graphite"), "font-family": "inherit", "font-size": 8.5 });
+    lx.textContent = e; svg.appendChild(lx);
+    const ly = el("text", { x: pad - 6, y: pad + i * (cell + gap) + cell / 2 + 3, "text-anchor": "end",
+      fill: T("graphite"), "font-family": "inherit", "font-size": 8.5 });
+    ly.textContent = e; svg.appendChild(ly);
+  });
+  PAIRS.forEach(p => {
+    const x = pad + p.a * (cell + gap), y = pad + p.b * (cell + gap);
+    const op = p.th < 0.5 ? 0 : 0.12 + 0.88 * (p.th / PAIR_PEAK);
+    const r = el("rect", { x, y, width: cell, height: cell,
+      fill: op ? T("cap-3") : T("paper-2"), "fill-opacity": op || 1 });
+    const tt = el("title");
+    tt.textContent = ENGINES[p.a] + " × " + ENGINES[p.b] + " · " +
+      (p.th < 0.5 ? "none measured" : Math.round(p.th) + " token-hours/day") +
+      (p.impaired ? " · under 75% pair-observed" : "");
+    r.appendChild(tt); svg.appendChild(r);
+    if (p.impaired) svg.appendChild(el("path", {
+      d: "M" + (x + cell) + " " + y + " l-8 0 l8 8 Z", fill: T("crimson") }));
+  });
+  const box = h("div", { class: "chart", style: "font-family:var(--mono);max-width:30rem" });
+  box.appendChild(svg);
+  mount.appendChild(box);
+}
+
+/* ══ SECTION 1 — the waste meter, with the thrash lens ══════════════════════ */
+function renderWaste() {
+  const mount = document.getElementById("s-waste");
+  mount.replaceChildren();
+  /* no declared threshold in v0 (ruled an add-on pending feedback) — and with
+     no declared line there is no honest fine/impaired verdict, so no state chip */
+  const top = h("div", { class: "hero-top" });
+  top.appendChild(h("h2", { class: "sec__h" }, "Repeat compute"));
+  top.appendChild(info("repeat_compute", "repeat compute"));
+  mount.appendChild(top);
+
+  /* one anchor line; the lens below is the meter face */
+  const an = h("div", { class: "heroanchor" });
+  const f = h("span", { class: "heroanchor__i" });
+  f.appendChild(h("span", { class: "heroanchor__f" }, pct(WASTE_FULL / STORED_FULL, 2)));
+  f.appendChild(h("span", { class: "lock__u" }, "of " + compact(STORED_FULL) + " stored"));
+  an.appendChild(f);
+  [["repeat compute", "≥ " + int(WASTE_FULL) + " tokens · 14 d"],
+   ["coverage", pct(COV_FULL, 1) + " token-weighted"]].forEach(([k, v]) => {
+    const i = h("span", { class: "heroanchor__i" });
+    i.appendChild(h("span", { class: "lock__u" }, k));
+    i.appendChild(h("span", { style: "font-weight:500" }, v));
+    an.appendChild(i);
+  });
+  const anBlk = h("div", { class: "blk" });
+  anBlk.appendChild(blkHead("fleet · stamped 14 d"));
+  anBlk.appendChild(an);
+  mount.appendChild(anBlk);
+
+  /* ── the thrash lens: controls on canvas, then titled blocks ── */
+  const m = selMember();
+  const S = seriesFor(m, WIN, SC);
+  const total = S.bandTotals.reduce((a, x) => a + x, 0);
+  const shortShare = (S.bandTotals[0] + S.bandTotals[1]) / total;
+
+  /* ONE panel: the controls live in the head of the panel they change, and the
+     gauges, chart and breakdown they scope are its internal regions. */
+  const scopeLabel = (CUT === "fleet" ? "fleet" : m.label) + " · " + S.w.rangeLabel;
+  const panel = h("div", { class: "blk" });
+  /* the lookback bound is method vocabulary: it lives in the hover and in the
+     one gauge tile it produces, never as a jargon chip on the head */
+  /* Ruled 2026-08-28: heads carry the ROLE in plain words; the method name
+     ("time since eviction") lives in the hover title. A method noun directly
+     under the block title read as a topic change, not a decomposition. */
+  panel.appendChild(blkHead("how soon it comes back · " + scopeLabel, [
+    info("thrash", "time since eviction")
+  ]));
+  panel.appendChild(cutBar([
+    ["cut", [["fleet", "fleet"], ["workload", "by workload"], ["instance", "by instance"], ["model", "by model"]],
+      CUT, k => { CUT = k; SEL = null; }],
+    ["window", Object.entries(WINS).map(([k, w]) => [k, w.label]).concat([["custom", "custom"]]),
+      WIN, k => { WIN = k; }]
+  ]));
+
+  if (WIN === "custom")
+    panel.appendChild(rangeRow(CR_FROM, CR_TO, v => { CR_FROM = v; }, v => { CR_TO = v; }, S.w));
+
+  panel.appendChild(kpis([
+    ["≥ " + int(total), "repeat compute", true],
+    [pct(shortShare, 1), "under 10 min", false, "≥ " + int(S.bandTotals[0] + S.bandTotals[1]) + " tokens"],
+    ["≥ " + int(total * 0.14), "gap unobserved", false,
+     "first stored in the window, or gone longer than 72 h — indistinguishable by construction. Cold-class mass: beside the bands, never in the stack."],
+    [pct(m.cov, 1), "coverage"]
+  ]));
+
+  const chartBlk = h("div", { class: "blk__sub" });
+  bandStack(chartBlk, {
+    rows: S.rows, bands: GAP_BANDS, cols: S.w.cols, unit: "tokens/" + S.w.unitName,
+    unitShort: "tokens", height: 250, tickEvery: S.w.tickEvery,
+    markers: markerMarks(S.w), spans: spanFracs(LSEL, S.w), selId: LSEL,
+    title: "Repeat compute per bucket, stacked by time-since-eviction band. Darkest is the shortest gap."
+  });
+  const lg = h("div", { class: "bandline" });
+  GAP_BANDS.forEach((b, k) => {
+    const i = h("span", { class: "bandline__i", title: "≥ " + int(S.bandTotals[k]) + " tokens · " + pct(S.bandTotals[k] / total, 1) });
+    i.appendChild(h("span", { class: "bandline__sw", style: "background:" + b.color }));
+    i.appendChild(h("span", { class: "bandline__n" }, b.label));
+    lg.appendChild(i);
+  });
+  chartBlk.appendChild(lg);
+  panel.appendChild(chartBlk);
+
+  attribution(panel, { selId: LSEL, setSel: k => { LSEL = k; },
+    scopeKey: SCOPE_OF[m.key] || "fleet",
+    scopeLabel: CUT === "fleet" ? "fleet" : m.label, primary: "rc" });
+
+  const brkBlk = h("div", { class: "blk__sub" });
+  brkBlk.appendChild(h("h4", { class: "plate__t" }, "breakdown · " + (CUT === "fleet" ? "fleet" : "by " + CUT)));
+  compRegister(brkBlk, {
+    label: "composition · " + (CUT === "fleet" ? "fleet" : m.label) + " · " + S.w.rangeLabel,
+    shares: S.bandTotals.map(v => v / total), bands: GAP_BANDS,
+    titles: S.bandTotals.map(v => "≥ " + int(v) + " tokens")
+  });
+
+  /* ── the working table: one row per cut member. Click retargets the chart. ── */
+  if (CUT !== "fleet") {
+    const wrap = h("div", { class: "tbl-wrap", style: "margin-top:0.9rem" });
+    const tbl = h("table", { class: "tbl" });
+    tbl.innerHTML = "<thead><tr><th>" + CUT + "</th><th>shape</th><th class='n'>repeat compute</th>" +
+      "<th class='n'>share</th><th class='n'>under 10 min</th><th class='n'>coverage</th><th></th></tr></thead>";
+    const tb = h("tbody");
+    CUTS[CUT].forEach(mm => {
+      const mt = seriesFor(mm, WIN, SC).bandTotals;
+      const mtot = mt.reduce((a, x) => a + x, 0);
+      const tr = h("tr", { class: "is-drill", tabindex: "0", "aria-pressed": String(mm.key === m.key) });
+      tr.appendChild(h("td", {}, mm.key === "unattributed" || mm.key === "undeclared"
+        ? "<span class='unit'>" + mm.label + "</span>" : mm.label));
+      const td = h("td"); td.appendChild(stripEl(mm.profile, GAP_BANDS)); tr.appendChild(td);
+      tr.appendChild(h("td", { class: "n" }, "≥ " + int(mtot)));
+      tr.appendChild(h("td", { class: "n" }, pct(mm.share, 1)));
+      tr.appendChild(h("td", { class: "n" }, pct(mm.profile[0] + mm.profile[1], 1)));
+      tr.appendChild(h("td", { class: "n" }, pct(mm.cov, 1)));
+      tr.appendChild(h("td", { class: "chev" }, "›"));
+      const go = () => { SEL = mm.key; syncURL(); render(); };
+      tr.addEventListener("click", go);
+      tr.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+      tb.appendChild(tr);
+    });
+    tbl.appendChild(tb); wrap.appendChild(tbl); brkBlk.appendChild(wrap);
+    if (CUT === "instance") brkBlk.appendChild(h("p", { class: "stamp", style: "margin-top:0.4rem" },
+      "top 8 of <b>" + POP.holders_listable + "</b> ranks · by repeat compute"));
+  }
+  panel.appendChild(brkBlk);
+  mount.appendChild(panel);
+}
+
+/* ══ SECTION 3 — placement ══════════════════════════════════════════════════ */
+function renderPlacement() {
+  const mount = document.getElementById("s-placement");
+  mount.replaceChildren();
+  const m = placeSel();
+  /* no section-level bound stamp: the event-grain bound belongs on the one
+     block it actually bounds (the whales), and the chrome carries the horizon */
+  mount.appendChild(secHead("Placement", "replication", null, null, 2));
+
+  /* fleet status is its own anchor block, stamped — never mixed into a
+     cut-scoped gauge row */
+  const anBlk = h("div", { class: "blk" });
+  anBlk.appendChild(blkHead("fleet · stamped 14 d · daily rates"));
+  const an = h("div", { class: "heroanchor" });
+  const f = h("span", { class: "heroanchor__i",
+    title: "mean copies " + MEAN_COPIES.toFixed(2) + "× per cached token-hour" });
+  f.appendChild(h("span", { class: "heroanchor__f" }, pct(DUP_TH_DAY / CACHED_TH_DAY, 1)));
+  f.appendChild(h("span", { class: "lock__u" }, "of " + compact(CACHED_TH_DAY) + " tok-h/day cached held more than once"));
+  an.appendChild(f);
+  [["duplicated", compact(DUP_TH_DAY) + " tok-h/day"],
+   ["cross-engine", pct(0.71, 0)]].forEach(([k, v]) => {
+    const i = h("span", { class: "heroanchor__i" });
+    i.appendChild(h("span", { class: "lock__u" }, k));
+    i.appendChild(h("span", { style: "font-weight:500" }, v));
+    an.appendChild(i);
+  });
+  anBlk.appendChild(an);
+  mount.appendChild(anBlk);
+
+  /* ONE panel: the workload cut lives in the head of the panel it changes;
+     gauges, chart and breakdown are its regions. Matrix and whales stay out —
+     they do not follow this cut, so this panel's controls cannot touch them. */
+  const pw = winDesc(PWIN, PFROM, PTO);
+  const panel = h("div", { class: "blk" });
+  panel.appendChild(blkHead("copies · " + m.label + " · " + pw.rangeLabel));
+  panel.appendChild(cutBar([
+    ["cut", PLACE_CUTS.map(p => [p.key, p.label]), PSEL, k => { PSEL = k; }],
+    ["window", Object.entries(WINS).map(([k, w2]) => [k, w2.label]).concat([["custom", "custom"]]),
+      PWIN, k => { PWIN = k; }]
+  ]));
+  if (PWIN === "custom")
+    panel.appendChild(rangeRow(PFROM, PTO, v => { PFROM = v; }, v => { PTO = v; }, pw));
+  /* every gauge follows the cut; the first follows the window too */
+  panel.appendChild(kpis([
+    [compact(DUP_TH_DAY * m.share * (pw.spanMs / DAY_MS2)), "tok-h duplicated", true],
+    [pct(m.cross, 0), "cross-engine"],
+    [String(m.pairs), "pairs"],
+    [pct(m.weakest, 0), "weakest cell", false, "lowest pair-observed time in this cut's pairs"]
+  ]));
+
+  const copyBlk = h("div", { class: "blk__sub" });
+  bandStack(copyBlk, {
+    rows: replSeriesFor(m, pw), bands: COPY_BANDS, cols: pw.cols, unit: "token-hours/" + pw.unitName,
+    unitShort: "token-hours", height: 200, tickEvery: pw.tickEvery,
+    markers: markerMarks(pw), spans: spanFracs(PMK, pw), selId: PMK,
+    title: "Duplicated token-hours per bucket, stacked by simultaneous copy count. Darkest is two copies."
+  });
+  const lg = h("div", { class: "bandline" });
+  COPY_BANDS.forEach((b, k) => {
+    const i = h("span", { class: "bandline__i", title: int(DUP_TH_DAY * m.share * m.profile[k]) + " tok-h/day · " + pct(m.profile[k], 1) });
+    i.appendChild(h("span", { class: "bandline__sw", style: "background:" + b.color }));
+    i.appendChild(h("span", { class: "bandline__n" }, b.label));
+    lg.appendChild(i);
+  });
+  copyBlk.appendChild(lg);
+  compRegister(copyBlk, {
+    label: "composition · " + m.label + " · " + pw.rangeLabel,
+    shares: m.profile, bands: COPY_BANDS,
+    titles: m.profile.map((_, k) => int(DUP_TH_DAY * m.share * m.profile[k]) + " tok-h/day")
+  });
+  panel.appendChild(copyBlk);
+
+  attribution(panel, { selId: PMK, setSel: k => { PMK = k; },
+    scopeKey: SCOPE_OF[m.key] || "fleet", scopeLabel: m.label, primary: "du" });
+
+  /* the working table: one row per workload. Click retargets the chart. */
+  const tblBlk = h("div", { class: "blk__sub" });
+  tblBlk.appendChild(h("h4", { class: "plate__t" }, "breakdown · by workload"));
+  const wrap = h("div", { class: "tbl-wrap" });
+  const tbl = h("table", { class: "tbl" });
+  tbl.innerHTML = "<thead><tr><th>workload</th><th>copies</th><th class='n'>tok-h/day</th><th class='n'>share</th>" +
+    "<th class='n'>cross-engine</th><th class='n'>pairs</th><th class='n'>weakest cell</th><th></th></tr></thead>";
+  const tb = h("tbody");
+  PLACE_CUTS.filter(p => p.key !== "fleet").forEach(p => {
+    const tr = h("tr", { class: "is-drill", tabindex: "0", "aria-pressed": String(p.key === m.key) });
+    tr.appendChild(h("td", {}, p.key === "unattributed" ? "<span class='unit'>unattributed</span>" : p.label));
+    const td = h("td"); td.appendChild(stripEl(p.profile, COPY_BANDS)); tr.appendChild(td);
+    tr.appendChild(h("td", { class: "n" }, int(DUP_TH_DAY * p.share)));
+    tr.appendChild(h("td", { class: "n" }, pct(p.share, 1)));
+    tr.appendChild(h("td", { class: "n" }, pct(p.cross, 0)));
+    tr.appendChild(h("td", { class: "n" }, String(p.pairs)));
+    tr.appendChild(h("td", { class: "n" + (p.weakest < 0.75 ? " refused" : "") },
+      (p.weakest < 0.75 ? "<b>" + pct(p.weakest, 0) + "</b>" : pct(p.weakest, 0))));
+    tr.appendChild(h("td", { class: "chev" }, "›"));
+    const go = () => { PSEL = p.key; syncURL(); render(); };
+    tr.addEventListener("click", go);
+    tr.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb); wrap.appendChild(tbl); tblBlk.appendChild(wrap);
+  panel.appendChild(tblBlk);
+  mount.appendChild(panel);
+
+  /* matrix and whales: independent of the workload cut, so independent blocks */
+  const mx = h("div", { class: "blkrow" });
+  const left = h("div", { class: "blk" });
+  left.appendChild(blkHead("engine pairs · day grain", [info("pairs", "engine pairs")]));
+  pairMatrix(left);
+  left.appendChild(h("p", { class: "stamp", style: "margin-top:0.4rem" },
+    "<b>" + int(PAIRS.filter(p => p.th >= 0.5).length) + "</b> of " + int(PAIRS.length) +
+    " pairs measured · top 12 of " + POP.instances + " engines"));
+  mx.appendChild(left);
+
+  const right = h("div", { class: "blk" });
+  right.appendChild(blkHead("heaviest identities · event grain"));
+  const wrap2 = h("div", { class: "tbl-wrap", style: "margin-top:0.4rem" });
+  const tbl2 = h("table", { class: "tbl", style: "min-width:0" });
+  tbl2.innerHTML = "<thead><tr><th>identity</th><th class='n'>token-hours</th><th class='n'>holders</th><th>workload</th><th></th></tr></thead>";
+  const tb2 = h("tbody");
+  WHALES.forEach(w => {
+    const tr = h("tr", { class: "is-drill", tabindex: "0" });
+    tr.appendChild(h("td", {}, w.id));
+    tr.appendChild(h("td", { class: "n" }, int(w.th)));
+    tr.appendChild(h("td", { class: "n" }, String(w.holders)));
+    tr.appendChild(h("td", {}, w.workload === "unattributed" ? "<span class='unit'>unattributed</span>" : w.workload));
+    tr.appendChild(h("td", { class: "chev" }, "›"));
+    tb2.appendChild(tr);
+  });
+  tbl2.appendChild(tb2); wrap2.appendChild(tbl2); right.appendChild(wrap2);
+  right.appendChild(h("p", { class: "stamp", style: "margin-top:0.4rem" }, "event detail · last <b>" + CTX.raw_horizon_days + " d</b>"));
+  mx.appendChild(right);
+  mount.appendChild(mx);
+}
+
+/* ══ SECTION 4 — trust, compact ═════════════════════════════════════════════ */
+function renderTrust() {
+  const mount = document.getElementById("s-trust");
+  mount.replaceChildren();
+  mount.appendChild(secHead("Trust", "trust", null, null, 2));
+  const g = h("div", { class: "trust" });
+  /* instance-time coverage, NOT token-weighted: this surface asks "was the
+     instrument looking", and the token-weighted figure already renders once,
+     beside the mass it qualifies. Three populations, three plain words. */
+  [["99.4%", "instance-time coverage", "covered time ÷ window time · was telemetry present"],
+   [String(POP.holders_listable), "ranks observed · 14 d", "one rank = instance × data-parallel rank × cache group · the denominator of every figure above"],
+   [String(POP.instances), "engines", "physical engines the taps sit beside"],
+   [String(POP.runs), "tap processes", "a restarted engine is a new tap process · staleness is judged per process"]].forEach(([v, u, tip]) => {
+    const d = h("div", { title: tip });
+    d.appendChild(h("div", { class: "trust__v" }, v));
+    d.appendChild(h("div", { class: "trust__u" }, u));
+    g.appendChild(d);
+  });
+  const blk = h("div", { class: "blk" });
+  blk.appendChild(blkHead("roster and coverage"));
+  blk.appendChild(g);
+  const chips = h("div", { style: "display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.7rem" });
+  RUNS.forEach(r => { if (r.count) chips.appendChild(chipEl(r.state, r.count + " " + r.label, null)); });
+  /* plain words: state + count + label carry it; provenance suffixes to hover */
+  chips.querySelectorAll(".chip__pv").forEach(x => { x.parentElement.setAttribute("title", x.textContent); x.remove(); });
+  const role = h("span", { class: "stamp", style: "align-self:center" });
+  role.innerHTML = "detail on <a href='../v2/health.html' style='color:var(--ink)'>health ›</a>";
+  chips.appendChild(role);
+  blk.appendChild(chips);
+  mount.appendChild(blk);
+}
+
+/* ══ chrome ═════════════════════════════════════════════════════════════════ */
+(function mockbar3() {
+  const bar = h("div", { class: "mockbar" });
+  bar.appendChild(h("span", { class: "mockbar__l" }, "mockup · v3.1 proposal · synthetic scaffolding, not fleet data"));
+  const box = h("span", { class: "ages" });
+  box.appendChild(h("span", { class: "mockbar__l" }, "scenario"));
+  Object.values(SCENARIOS).forEach(sc => {
+    const b = h("button", { class: "ages__b", type: "button" }, sc.label);
+    b.setAttribute("aria-pressed", String(sc.key === SC.key));
+    b.addEventListener("click", () => {
+      SC = sc; syncURL();
+      box.querySelectorAll(".ages__b").forEach(x => x.setAttribute("aria-pressed", String(x.textContent === sc.label)));
+      render();
+    });
+    box.appendChild(b);
+  });
+  bar.appendChild(box);
+  document.body.prepend(bar);
+})();
+
+frame("Dashboard", { status: null });
+/* the rail holds only v3 destinations: retired surfaces (reports, declared
+   inputs) and v2-only pages leave it rather than linking backward */
+document.querySelectorAll(".rail__i, .pal__i").forEach(a => {
+  const href = a.getAttribute("href") || "";
+  if (/^(reports|about|declared-inputs)\.html$/.test(href)) { a.remove(); return; }
+  if (/^holder\.html/.test(href)) a.setAttribute("href", "../v2/" + href);
+  const t = a.querySelector(".rail__t");
+  if (t && t.textContent === "Holders") t.textContent = "Ranks";
+});
+document.querySelectorAll(".rail__grp").forEach(g => { if (!g.querySelector(".rail__i")) g.remove(); });
+/* honest fleet name for any public capture; ?shot=1 strips rig chrome for
+   marketing screenshots (the site captions them "sample data") */
+const fl = document.querySelector(".topbar__f");
+if (fl) fl.textContent = "demo-fleet";
+if (qs("shot")) document.querySelectorAll(".mockbar").forEach(m => m.remove());
+/* the segment TIME is the signal; the id is provenance, demoted to hover.
+   "discriminator" is method vocabulary; the glass says "analysis". */
+document.querySelectorAll(".statusline__i").forEach(i => {
+  const k = i.querySelector(".statusline__k");
+  if (!k) return;
+  if (k.textContent === "segment") {
+    const v = i.querySelector(".statusline__v");
+    if (v) { v.setAttribute("title", "segment " + CTX.status.last_segment); v.textContent = CTX.status.last_segment_at; }
+  }
+  if (k.textContent === "discriminator") k.textContent = "analysis";
+});
+
+function render() {
+  const ctx = document.getElementById("ctx");
+  ctx.replaceChildren();
+  [["window", CTX.window.start + "→" + CTX.window.end],
+   ["last pass", CTX.pass.at], ["semantics", CTX.pass.semantics]].forEach(([k, v]) => {
+    const i = h("span", { class: "ctxbar__i" });
+    i.appendChild(h("span", { class: "ctxbar__k" }, k));
+    i.appendChild(h("span", { class: "ctxbar__v" }, v));
+    ctx.appendChild(i);
+  });
+  renderWaste(); renderPlacement(); renderTrust();
+  sectionNav(null, [
+    { id: "waste",     label: "Repeat compute",  state: "complete" },
+    { id: "placement", label: "Placement",       state: "complete" },
+    { id: "trust",     label: "Trust",           state: "complete" }
+  ]);
+}
+render();
+</script>
+</body>
+</html>

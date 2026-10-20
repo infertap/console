@@ -1,0 +1,61 @@
+{
+  "name": "@infertap/console",
+  "version": "1.0.3",
+  "sideEffects": [
+    "*.css"
+  ],
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.22.0 <23"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && npm run audit:bundle",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "gen:client": "openapi-typescript contract/openapi.json -o src/data/generated/api.d.ts",
+    "audit:bundle": "node scripts/audit-bundle.mjs dist",
+    "contract:diff": "node scripts/contract-diff.mjs",
+    "notices": "node scripts/third-party-notices.mjs > THIRD-PARTY-NOTICES",
+    "notices:check": "node scripts/third-party-notices.mjs --check"
+  },
+  "dependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "ajv": "8.20.0",
+    "eslint": "10.8.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "jsdom": "29.1.1",
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.66.0",
+    "vite": "8.2.0",
+    "vitest": "4.1.10"
+  },
+  "overrides": {
+    "js-yaml": "4.3.2",
+    "undici": "7.29.1",
+    "brace-expansion@^2": "2.1.7",
+    "brace-expansion@^5": "5.0.12",
+    "fast-uri": "3.1.8",
+    "source-map-js": "1.2.2"
+  },
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infertap/console.git"
+  },
+  "homepage": "https://infertap.ai",
+  "author": "InferTap <cort@infertap.ai>"
+}

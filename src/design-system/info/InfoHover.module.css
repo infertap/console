@@ -1,0 +1,83 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* Hover teaches. Ported from `.info*` in the mock.
+
+   A definition teaches the AXIS: what this measures, how it is computed, its basis
+   and its bound. It never reads the shape of the data, because reading the shape is
+   an interpretation and this product does not make those.
+
+   CSS-driven on hover and focus-within so the definition is reachable by keyboard
+   without a click, and so no state has to be held for something this small. */
+
+.info {
+  position: relative;
+  display: inline-flex;
+}
+
+.button {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  background: var(--canvas);
+  color: var(--graphite);
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.button:hover,
+.button:focus-visible {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.card {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 60;
+  width: min(28rem, 80vw);
+  background: var(--plate);
+  border: 1px solid var(--ink);
+  box-shadow: 0.25rem 0.25rem 0 var(--paper-3);
+  padding: 0.85rem 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 110ms linear,
+    visibility 110ms linear;
+}
+
+.info:hover .card,
+.info:focus-within .card {
+  opacity: 1;
+  visibility: visible;
+}
+
+.card dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 0.75rem;
+}
+
+.card dt {
+  font-family: var(--mono);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  padding-top: 0.15rem;
+}
+
+.card dd {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}

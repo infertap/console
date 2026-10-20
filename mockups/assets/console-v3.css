@@ -1,0 +1,96 @@
+/* v3 grammar additions — layered over console-v2.css */
+/* ── v3-only tokens and furniture. Everything else inherits v2. ──────────────
+   The capacity register gains a RAMP: ordered copy-count bands need sequential
+   steps of the register's own hue, exactly as the recompute register borrows the
+   seq scale. Monotonic lightness, wide adjacent steps; stacked segments carry a
+   plate-colored gap stroke so adjacency never rests on hue alone. */
+:root {
+  --cap-1:#eddcba; --cap-2:#d3a852; --cap-3:#b8791a; --cap-4:#7a4c0c;
+}
+/* ── AFFORDANCE RULE (v3.1): a box is something you can press; a label is flat.
+   v2 dressed state chips and cut buttons identically, so controls and labels
+   were indistinguishable. Here: chips and deviation stamps drop their boxes
+   (the state mark and small caps carry them); segmented cut groups, inputs and
+   chevron rows keep boxes, and controls respond on hover. ──────────────────── */
+.chip{border:0;background:transparent;padding:0.22rem 0}
+.chip--impaired{border:0}
+.stamp--dev{border:0;background:transparent;padding:0 0 0 0.5rem;border-left:2px solid var(--ink)}
+.cut__b:hover:not([aria-pressed="true"]){background:var(--paper-3);color:var(--ink)}
+/* ── SECTION STRUCTURE (v3.1): the heading lives on the CANVAS; beneath it,
+   one or more independent plates (.blk). A section is a group, not a box —
+   independent content gets an independent block. ─────────────────────────── */
+.sec{background:transparent;padding:0;margin-bottom:2rem}
+/* sections are PEERS: one title size for all of them. v2's "progressive
+   density" (one lead, shrinking tiers) belonged to the article voice. */
+.sec__h{font-size:clamp(1.3125rem,2.2vw,1.625rem)}
+.blk{background:var(--plate);padding:0.9rem 1.1rem 1rem;margin-top:0.75rem}
+.blkrow{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:0.75rem;align-items:start;margin-top:0.75rem}
+.blkrow .blk{margin-top:0}
+@media (max-width:62rem){.blkrow{grid-template-columns:minmax(0,1fr)}}
+.ledger{margin-top:0.75rem}
+/* every block carries its own head: what this card shows, at what scope.
+   CONTAINMENT RULE: a control changes only what its own panel contains, so a
+   panel whose regions share controls holds them all, controls in its head. */
+.blk__head{display:flex;align-items:center;gap:0.55rem;flex-wrap:wrap;margin-bottom:0.55rem}
+.blk__head .plate__t{margin:0}
+.blk__sub{margin-top:1rem;padding-top:0.85rem;border-top:1px solid var(--rule-2)}
+.blk .heroanchor{border:0;padding:0.1rem 0 0;margin:0}
+.blk .kpis{margin:0.2rem 0 0}
+/* the ledger: markers as rows, one open at a time. The open row is the panel. */
+.ledger{border:1px solid var(--rule);background:var(--plate)}
+.ledger__r{display:flex;align-items:baseline;gap:0.9rem;width:100%;text-align:left;
+  border:0;border-top:1px solid var(--rule-2);background:transparent;cursor:pointer;
+  font-family:var(--mono);font-size:0.75rem;color:var(--ink);padding:0.5rem 0.8rem}
+.ledger__r:first-child{border-top:0}
+.ledger__r:hover{background:var(--canvas)}
+.ledger__r[aria-expanded="true"]{background:var(--canvas);border-left:2px solid var(--ink)}
+.ledger__d{flex:none;color:var(--ink);font-weight:600}
+.ledger__t{flex:none;color:var(--graphite)}
+.ledger__l{flex:1 1 auto;min-width:8rem}
+.ledger__k{flex:none;font-size:0.625rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--graphite)}
+.attrib{border-top:1px solid var(--ink);padding:0.85rem 0.8rem 1rem;background:var(--plate)}
+.attrib__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(14rem,18rem);gap:1rem 2rem;align-items:start}
+@media (max-width:62rem){.attrib__grid{grid-template-columns:minmax(0,1fr)}}
+.attrib__reg{font-family:var(--mono);font-size:0.625rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--graphite);margin:0 0 0.2rem}
+.attrib__reg b{color:var(--ink)}
+/* the band legend: one compact inline strip. The chart carries the story;
+   the legend identifies and quantifies, in a single wrapping line. */
+.bandline{display:flex;flex-wrap:wrap;gap:0.35rem 1.7rem;margin:0.55rem 0 0;font-family:var(--mono);font-size:0.6875rem}
+.bandline__i{display:inline-flex;align-items:baseline;gap:0.45rem}
+.bandline__sw{width:0.65rem;height:0.65rem;flex:none;align-self:center;border:1px solid var(--rule)}
+.bandline__n{color:var(--graphite)}
+/* the hover readout: the hovered segment's identity and numbers, in a reserved
+   line under the chart so the layout never jumps. Hover teaches. */
+.hoverline{font-family:var(--mono);font-size:0.6875rem;color:var(--graphite);min-height:1.15rem;margin:0.25rem 0 0}
+.hoverline b{color:var(--ink);font-weight:500}
+/* the composition register: the window's band shares for the selected scope,
+   as a 100%-stacked strip with direct labels. Sits with the breakdown, because
+   it is the breakdown's summary row, not a color key. */
+.compbar{display:flex;height:0.7rem;margin-top:0.35rem;max-width:44rem}
+.compbar span{display:block;height:100%;border-right:1.5px solid var(--plate)}
+.compbar span:last-child{border-right:0}
+.compbar-l{display:flex;font-family:var(--mono);font-size:0.625rem;color:var(--graphite);margin-top:0.2rem;max-width:44rem}
+.compbar-l span{text-align:center;overflow:hidden;white-space:nowrap}
+.chartbox{margin-top:0.5rem}
+/* the custom range row: dates in, grain OUT — derived from range × retention
+   and stamped, never silently picked. */
+.rangerow{display:flex;align-items:center;gap:0.6rem 0.9rem;flex-wrap:wrap;margin:-0.35rem 0 0.85rem}
+.rangein{font-family:var(--mono);font-size:0.6875rem;border:1px solid var(--rule);background:var(--canvas);
+  color:var(--ink);padding:0.22rem 0.45rem;color-scheme:light}
+.rangein:focus-visible{outline:2px solid var(--petrol);outline-offset:1px}
+/* marker chips are CONTROLS (boxed, per the affordance rule); pressed = ink */
+.anchor[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+/* the anchor line: the whole scalar story in one row. The lens below is the
+   meter face; this is the denominator, the threshold relation and the warrant.
+   (Named heroanchor: v2 already owns `.anchor` for marker chips.) */
+.heroanchor{display:flex;flex-wrap:wrap;align-items:baseline;gap:0.4rem 1.75rem;margin:0.45rem 0 1rem;
+  padding:0.55rem 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-family:var(--mono)}
+.heroanchor__f{font-family:var(--mono);font-weight:500;font-size:1.5rem;letter-spacing:-0.02em;line-height:1}
+.heroanchor__i{display:inline-flex;gap:0.45rem;align-items:baseline}
+.mx{display:grid;grid-template-columns:minmax(0,1fr) minmax(17rem,25rem);gap:1.25rem 2.5rem;align-items:start;margin-top:0.9rem}
+@media (max-width:62rem){.mx{grid-template-columns:minmax(0,1fr)}}
+/* the working table: one row per cut member, shape as a 100%-stacked strip.
+   THIS is the primary surface; the fleet chart above is only the default cut. */
+.strip{display:inline-flex;width:9rem;height:0.55rem;vertical-align:middle;background:var(--paper-2)}
+.strip i{display:block;height:100%;border-right:1px solid var(--plate)}
+.tbl tbody tr[aria-pressed="true"]{background:var(--canvas);box-shadow:inset 2px 0 0 var(--ink)}

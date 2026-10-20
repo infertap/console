@@ -1,0 +1,33 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+.awaiting {
+  color: var(--graphite);
+  max-width: var(--measure);
+  margin: 0.35rem 0;
+}
+
+.awaiting a,
+.stamp a {
+  color: var(--ink);
+}
+
+.stamp {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  margin: 0.4rem 0 0;
+}
+
+.stamp b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* The working table's rows are controls: click retargets the chart. */
+.working tbody tr {
+  cursor: pointer;
+}
+
+.working tbody tr[aria-pressed='true'] {
+  background: var(--canvas);
+  box-shadow: inset 2px 0 0 var(--ink);
+}

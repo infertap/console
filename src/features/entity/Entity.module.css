@@ -1,0 +1,370 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+.awaiting {
+  color: var(--graphite);
+  max-width: var(--measure);
+  margin: 0.35rem 0;
+}
+
+.stamp {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  margin: 0.4rem 0 0;
+}
+
+.stamp a,
+.awaiting a {
+  color: var(--ink);
+}
+
+.stamp b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* The identity row: label · value pairs, mono, one line each. */
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.6rem;
+  margin: 0.5rem 0;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+}
+
+.identity b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.identity .undeclared {
+  color: var(--graphite);
+  font-style: italic;
+}
+
+/* The status binary, as the Ranks column paints it: quiet when active, weighted when not. */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--graphite);
+}
+
+.status[data-tone='faulted'],
+.status[data-tone='stopped'],
+.status[data-tone='unheard'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.statusMark {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--seq-4);
+}
+
+.status[data-tone='faulted'] .statusMark {
+  background: var(--crimson);
+}
+
+.status[data-tone='stopped'] .statusMark {
+  background: var(--pencil);
+}
+
+.status[data-tone='unheard'] .statusMark {
+  background: transparent;
+  border: 1px dashed var(--graphite);
+}
+
+/* The member distribution: one column per member, sorted worst first, the subject inked. */
+.dist {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 72px;
+  margin: 0.6rem 0 0.3rem;
+}
+
+.dist a,
+.dist span {
+  flex: 1 1 0;
+  min-width: 2px;
+  max-width: 18px;
+  background: var(--seq-4);
+  display: block;
+}
+
+.dist a:hover {
+  background: var(--seq-6);
+}
+
+.dist [data-subject='true'] {
+  background: var(--ink);
+}
+
+/* The hover join: the lit member holds its tone, the rest step back, from either half. */
+.dist[data-hovering='true'] a:not([data-hot='true']),
+.dist[data-hovering='true'] span:not([data-hot='true']) {
+  opacity: 0.35;
+}
+
+.dist [data-hot='true'] {
+  background: var(--seq-7);
+}
+
+.dist [data-hot='true'][data-subject='true'] {
+  background: var(--ink);
+}
+
+.distList span[data-hot='true'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.distList {
+  margin: 0.4rem 0 0;
+  line-height: 1.7;
+}
+
+/* Legend links stay INLINE: the table's own link class fills a cell (display: block), and
+   borrowing it here once broke every legend into a label-per-line stack. */
+.distList a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--pencil);
+}
+
+.distList a:hover {
+  border-bottom-color: var(--ink);
+}
+
+/* The stat row: four self-judging tiles, sparkline each, absolutes in the hover. */
+.statRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+
+.tile {
+  border-top: 2px solid var(--rule);
+  padding-top: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.tileValue {
+  font-family: var(--mono);
+  font-size: 1.45rem;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.tileUnit {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  color: var(--graphite);
+  text-transform: uppercase;
+}
+
+.tileSub {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+}
+
+.tileSub b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.spark {
+  width: 7.5rem;
+  height: 1.6rem;
+  display: block;
+  margin: 0.15rem 0 0;
+}
+
+@media (max-width: 720px) {
+  .statRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* The crosshair annotation: floated beside the tracker, never shifting the layout. */
+.chartWrap {
+  position: relative;
+}
+
+.tip {
+  position: absolute;
+  top: 0.25rem;
+  margin: 0 0.5rem;
+  pointer-events: none;
+  z-index: 3;
+  background: var(--canvas);
+  border: 1px solid var(--rule);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 12%);
+  padding: 0.35rem 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--ink);
+  min-width: 9rem;
+  max-width: 18rem;
+}
+
+.tipHead {
+  color: var(--graphite);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.2rem;
+}
+
+.tipRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.tipRow[data-muted='true'] {
+  color: var(--graphite);
+}
+
+.tipLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tipValue {
+  font-weight: 600;
+}
+
+.tipRow[data-muted='true'] .tipValue {
+  font-weight: 400;
+}
+
+.tipSwatch {
+  display: inline-block;
+  width: 0.6rem;
+  height: 3px;
+  flex: none;
+}
+
+/* Series legend swatches: the line's own tone, beside its member's link. */
+.swatch {
+  display: inline-block;
+  width: 0.7rem;
+  height: 3px;
+  vertical-align: middle;
+  margin-right: 0.15rem;
+}
+
+/* The duplication halves: the lever half and the architecture half, said apart. */
+.halves {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 0.6rem 0 0;
+  max-width: var(--measure-wide, 60rem);
+}
+
+.half {
+  border-top: 2px solid var(--rule);
+  padding-top: 0.4rem;
+}
+
+.half p {
+  color: var(--graphite);
+  font-size: 0.8125rem;
+  margin: 0.3rem 0 0;
+}
+
+.half .figure {
+  font-family: var(--mono);
+  font-size: 1.25rem;
+  color: var(--ink);
+}
+
+.half h4 {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--graphite);
+  margin: 0 0 0.2rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .halves {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The fleet browse: workload chips and the index's rate bars. */
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.5rem 0 0.2rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--seq-5);
+  color: var(--graphite);
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+}
+
+.chip:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.chip b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.chip i {
+  font-style: normal;
+  font-size: 0.6875rem;
+}
+
+.undeclared {
+  color: var(--graphite);
+  font-style: italic;
+}
+
+.shareBar {
+  display: inline-block;
+  width: 3.4rem;
+  height: 0.4rem;
+  background: var(--paper-2);
+  vertical-align: middle;
+  margin-right: 0.4rem;
+}
+
+.shareBar i {
+  display: block;
+  height: 100%;
+  background: var(--seq-5);
+}

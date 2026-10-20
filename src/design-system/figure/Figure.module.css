@@ -1,0 +1,152 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* The figure lockup. Ported from `.lock__*` and `.figure` in the mock. */
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+/* The bound glyph leads the number in the serif display tier. It is not decoration:
+   every figure this product states is a lower bound, and the glyph is where that is
+   said once rather than repeated in prose beside every panel. */
+.bound {
+  font-family: var(--display);
+  font-variation-settings: 'SOFT' 40, 'opsz' 144;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.value {
+  font-family: var(--mono);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Axes and figures are labelled in real units: tokens, events, fraction of stored
+   mass, ms gaps. A number with no unit is a number nobody can check. */
+.unit {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+/* Provenance: the coverage this was measured at and the basis that coverage was
+   computed on. Two figures at 80% on different bases are not comparable, so the
+   basis rides with the number rather than living in a caption somewhere. */
+.provenance {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  margin: 0;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.provenance b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* The two registers never share an axis, and never share a hue family either.
+   The VALUE carries the hue, not just the bound glyph: colour here is the register,
+   which is semantic state, so this is the tokens rule applied rather than bent. It is
+   also what separates a measured quantity from the chrome around it, since every label,
+   unit and provenance line on this page is mono in graphite. */
+.recompute .bound,
+.recompute .value {
+  color: var(--register-recompute);
+}
+
+.capacity .bound,
+.capacity .value {
+  color: var(--register-capacity);
+}
+
+.hero .value {
+  font-size: clamp(2.75rem, 6.5vw, 4.25rem);
+}
+
+.hero .bound {
+  font-size: clamp(1.4rem, 2.8vw, 1.875rem);
+}
+
+.panel .value {
+  font-size: clamp(1.4rem, 3vw, 1.875rem);
+}
+
+.panel .bound {
+  font-size: 1.125rem;
+}
+
+.cell {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.cell .value {
+  font-size: 0.8125rem;
+}
+
+.cell .bound {
+  font-size: 0.75rem;
+  font-family: var(--mono);
+}
+
+.cell .provenance {
+  font-size: 0.625rem;
+}
+
+/* ── The designed absence ────────────────────────────────────────────────────
+   An unmeasured position renders here, at the same size, in the same place. It
+   never renders as zero and it never collapses: sections resolve, they do not
+   reflow, so what will one day be a number occupies its position from day one. */
+
+.unmeasured .value {
+  color: var(--graphite);
+  font-weight: 400;
+}
+
+.hatch {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--graphite) 0 1.5px,
+    transparent 1.5px 5px
+  );
+  opacity: 0.5;
+  height: 0.75em;
+  align-self: center;
+  flex: none;
+}
+
+.hero .hatch {
+  width: 7rem;
+}
+
+.panel .hatch {
+  width: 4rem;
+}
+
+.cell .hatch {
+  width: 2rem;
+}
+
+.reason {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  margin: 0;
+  max-width: var(--measure);
+}

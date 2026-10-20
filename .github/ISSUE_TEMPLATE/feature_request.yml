@@ -1,0 +1,38 @@
+name: Feature request
+description: A panel, a reading, a route or a behaviour the console should have.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        `GOVERNANCE.md` says how a design change is ruled on. A request that touches the meaning of a figure belongs in the analyzer repository first; the console renders what its contract says.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to find out or do with the console, and what stops you today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: The proposal
+      description: What the console should show or do. If it is a figure, say which contract field it reads and which law in `README.md` governs how it renders.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What you tried instead, and why it is not enough.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - a panel or a figure's rendering
+        - a drill page or a route
+        - the data layer or the contract pin
+        - fixture mode
+        - accessibility or motion
+        - other

@@ -1,0 +1,87 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Nothing here writes anywhere.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # No dependency runs code at install time, in CI or anywhere else.
+  NPM_CONFIG_IGNORE_SCRIPTS: 'true'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned by commit, tag in the comment. A repo that commits its lockfile and refuses
+      # install scripts should not then run whatever `@v7` happens to point at today.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      # `npm ci` and never `npm install`: the lockfile is the build input, and a job that may
+      # resolve a different tree is a job that tests a different product.
+      - run: npm ci
+
+      - name: typecheck
+        run: npm run typecheck
+
+      - name: lint, including the architecture boundaries and the laws on glass
+        run: npm run lint
+
+      - name: test
+        # Includes test/gates.test.ts, which asserts every boundary and law rule actually FIRES.
+        # A gate that has only ever passed is one nobody knows works.
+        run: npm test
+
+      - name: build, and audit the artifact for external loads
+        # `npm run build` ends in scripts/audit-bundle.mjs: an air-gapped browser must render
+        # this perfectly, so the claim is checked against the artifact rather than the intent.
+        run: npm run build
+
+      - name: licence floor
+        run: node scripts/check-licences.mjs
+
+      - name: third-party notices cover what the bundle ships
+        # A different obligation from the floor above, and it needs its own check because the
+        # floor cannot see it: `check-licences.mjs` walks node_modules, and the fonts this bundle
+        # ships are VENDORED into src/, invisible to every dependency tool we have. That is how
+        # seven SIL Open Font License files came to ship with no attribution.
+        run: node scripts/third-party-notices.mjs --check
+
+      - name: every source file carries its SPDX header
+        run: node scripts/spdx-check.mjs
+
+      - name: known vulnerabilities
+        # Advisory rather than blocking on low severity: a floor nobody can pass gets bypassed,
+        # and a bypassed gate is worse than an honest threshold.
+        run: npm audit --audit-level=high
+
+      - name: the generated client matches the committed contract
+        # The client is committed so the build works offline. That makes it possible for the two
+        # to drift, so regenerating must be a no-op.
+        run: |
+          npm run gen:client
+          git diff --exit-code src/data/generated/api.d.ts \
+            || { echo "::error::src/data/generated/api.d.ts is stale. Run npm run gen:client and commit."; exit 1; }
+
+      # **No bundle artifact, deliberately.** The build above already proves the thing compiles
+      # and the audit already proves the artifact loads nothing external, which is what this job
+      # is for. Uploading `dist` on top of that bought click-to-download and nothing else: it is
+      # not the release artifact, because the daemon serves the bundle it shipped with, and any
+      # commit rebuilds in about a minute from `npm ci && npm run build`.
+      #
+      # It came out because it was the one step here with no reason of its own, and a pipeline
+      # where every step earns its place is easier to trust than one carrying a convenience that
+      # looks load-bearing.

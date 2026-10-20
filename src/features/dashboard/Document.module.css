@@ -1,0 +1,38 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* The document's own frame. Sections resolve inside it; it never reflows. */
+
+.document {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 6rem;
+}
+
+/* The canonical stamp, declared once under the title. Sections that match stay
+   silent, so a section that deviates is visible by contrast rather than by volume. */
+.canon {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--graphite);
+  margin: 0.5rem 0 0.9rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.canon b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.pv {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  margin: 0 0 0.5rem;
+}
+
+.awaiting {
+  padding: 0.35rem 0;
+}

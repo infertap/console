@@ -1,0 +1,428 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   infertap console v2 — frame, document, drill pages
+
+   IA, three levels:
+     0  the document. One scrolling page that IS the argument, in reading order.
+        Its sections never reflow; they resolve. There is no first-run page: the
+        document has exactly one layout at every age, and what changes with data is
+        each section's STATE.
+     1  drill pages, URL addressable, breadcrumb back to their parent section.
+     2  evidence. "Records behind this", raw-window-bounded, terminal everywhere.
+
+   DRILL GRAMMAR, stated where panel authors will read it:
+     hover teaches, click descends.
+     Hover and the info button give definitions: what this measures, its basis, its
+     bound. Click moves ONE level toward evidence and never sideways into
+     interpretation.
+
+   THE SUMMARY LAW: summaries compress volume, never valence. A strip that hides an
+   impaired count because it is small is lying by altitude.
+
+   Words on glass are labels, units, provenance and definitions. Colour is state.
+   No em dashes in UI copy.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@font-face { font-family: 'Fraunces Variable'; src: url('fonts/fraunces-latin-full-normal.woff2') format('woff2-variations'); font-weight: 100 900; font-display: block; }
+@font-face { font-family: 'IBM Plex Sans'; src: url('fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: block; }
+@font-face { font-family: 'IBM Plex Sans'; src: url('fonts/ibm-plex-sans-latin-500-normal.woff2') format('woff2'); font-weight: 500; font-display: block; }
+@font-face { font-family: 'IBM Plex Sans'; src: url('fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2'); font-weight: 600; font-display: block; }
+@font-face { font-family: 'IBM Plex Mono'; src: url('fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2'); font-weight: 400; font-display: block; }
+@font-face { font-family: 'IBM Plex Mono'; src: url('fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2'); font-weight: 500; font-display: block; }
+@font-face { font-family: 'IBM Plex Mono'; src: url('fonts/ibm-plex-mono-latin-600-normal.woff2') format('woff2'); font-weight: 600; font-display: block; }
+
+:root {
+  --paper: #e6eae4; --paper-2: #dde2da; --paper-3: #d3d9d0;
+  --ink: #1a1d1a; --graphite: #5b625a; --pencil: #a6aaa1;
+  --rule: #c5cabf; --rule-2: #d6dbd2;
+  --petrol: #0c5c58; --ochre: #b8791a; --crimson: #b32c5e;
+  --seq-1:#d2e3df; --seq-2:#aecfc9; --seq-3:#86b5ae; --seq-4:#5c9992; --seq-5:#3b7d77; --seq-6:#1e625d; --seq-7:#0c4744;
+  --register-recompute: var(--petrol);
+  --register-capacity: var(--ochre);
+  --display:'Fraunces Variable',Georgia,serif;
+  --body:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --measure: 34rem;
+  --rail-w: 13rem;
+
+  /* ── figure and ground ───────────────────────────────────────────────────
+     THE SURFACE RULE, and it is semantic rather than decorative:
+       dark chrome carries WALL-CLOCK-LIVE surfaces  (LIVE, next tick, last
+         segment, ingest lag, horizon, discriminator, and navigation)
+       the light canvas carries PASS-CLOCK ACCOUNTING (every figure that only
+         moves when a pass completes)
+     A number never crosses that boundary. If it is on the dark strip it is
+     ingest or health; if it is on a plate it advances only on pass completion. */
+  --chrome:      #1a1d1a;
+  --chrome-text: #e6eae4;
+  --chrome-dim:  #8b938a;
+  --chrome-rule: #343a33;
+  --chrome-accent: var(--seq-3);
+
+  /* EXACTLY ONE DARK SURFACE: the live status strip. The rail is distinguished
+     from the canvas by tint and edge, never by ink, because a second dark band
+     would spend weight the wall clock has not earned. */
+  --rail-bg: #dee2d9;
+
+  --canvas: var(--paper);
+  --plate:  #f6f8f4;
+
+  /* one inter-plate spacing token, visibly larger than any intra-plate gap */
+  --gap-plate: 1.15rem;
+  --gap-in:    0.55rem;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+img,svg,pre,table{max-width:100%}
+body{
+  margin:0; background-color:var(--paper);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23t)' opacity='0.045'/%3E%3C/svg%3E");
+  color:var(--ink); font-family:var(--body); font-size:0.9375rem; line-height:1.6; font-synthesis-weight:none;
+}
+.num,.mono,table,.figure,.chip__v{font-variant-numeric:tabular-nums lining-nums}
+
+/* ── type roles ─────────────────────────────────────────────────────────── */
+.display{font-family:var(--display);font-variation-settings:'SOFT' 60,'WONK' 1,'opsz' 120;font-weight:600;line-height:1.04;letter-spacing:-0.02em;margin:0}
+.figure{font-family:var(--mono);font-weight:500;line-height:1;letter-spacing:-0.01em;font-variant-numeric:tabular-nums lining-nums}
+.mono{font-family:var(--mono);font-size:0.8125rem}
+.pv{font-family:var(--mono);font-size:0.6875rem;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--graphite);margin:0}
+.pv--ink{color:var(--ink)}
+.prov{font-family:var(--mono);font-size:0.6875rem;color:var(--graphite);margin:0.5rem 0 0}
+.sec > .prov:last-child,.sec > div > .prov:last-child{margin-top:0.75rem;padding-top:0.55rem;border-top:1px solid var(--rule-2)}
+.prov b{color:var(--ink);font-weight:500}
+.h1{font-family:var(--display);font-variation-settings:'SOFT' 60,'WONK' 1,'opsz' 120;font-weight:600;font-size:clamp(1.5rem,3vw,2.125rem);letter-spacing:-0.02em;line-height:1.05;margin:0}
+/* Machine identifiers never wear the serif: its numeral makes usc1 read as uscl.
+   Declared after .h1 so it wins on source order at equal specificity. */
+.h1--mono{font-family:var(--mono);font-variation-settings:normal;font-weight:600;letter-spacing:0.05em;font-size:clamp(1.0625rem,1.9vw,1.3125rem)}
+
+/* ── mock banner. Scaffolding lives here and nowhere else. ──────────────── */
+.mockbar{
+  position:sticky;top:0;z-index:80;
+  background:repeating-linear-gradient(45deg,#efe3c6 0 7px,#e7d7b0 7px 14px);
+  color:#6b5216;border-bottom:1px solid #c9a95f;
+  font-family:var(--mono);font-size:0.5625rem;letter-spacing:0.14em;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:space-between;gap:0.3rem 1.25rem;flex-wrap:wrap;padding:0.18rem 0.75rem;
+}
+.mockbar__l{color:#8a6f22}
+.ages{display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap}
+.ages__b{font-family:var(--mono);font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;border:1px solid #c9a95f;background:rgba(255,255,255,0.45);color:#6b5216;padding:0.08rem 0.35rem;cursor:pointer}
+.ages__b[aria-pressed="true"]{background:#6b5216;color:#f4ecd8;border-color:#6b5216}
+.ages__b:focus-visible{outline:2px solid #6b5216;outline-offset:1px}
+
+/* ── app shell ──────────────────────────────────────────────────────────── */
+.app{display:grid;grid-template-columns:var(--rail-w) minmax(0,1fr);min-height:100vh;
+  background:linear-gradient(to right,
+    var(--rail-bg) 0 calc(var(--rail-w) - 1px),
+    var(--rule) calc(var(--rail-w) - 1px) var(--rail-w),
+    transparent var(--rail-w) 100%)}
+.app.is-collapsed{--rail-w:3.25rem}
+
+/* ── rail: DESTINATIONS, never sections ─────────────────────────────────── */
+.rail{padding:0.85rem 0 2rem;position:sticky;top:1.35rem;align-self:start;height:calc(100vh - 1.35rem);overflow-y:auto}
+.rail__grp{margin-bottom:1.5rem}
+.rail__gl{font-family:var(--mono);font-size:0.5625rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--pencil);padding:0 1rem;margin:0 0 0.5rem}
+.rail__i{display:flex;align-items:center;gap:0.6rem;padding:0.4rem 1rem;font-family:var(--mono);font-size:0.6875rem;font-weight:500;letter-spacing:0.13em;text-transform:uppercase;color:var(--graphite);text-decoration:none;border-left:2px solid transparent}
+.rail__i:hover{color:var(--ink);background:var(--paper-3)}
+.rail__i[aria-current]{color:var(--ink);border-left-color:var(--petrol);background:var(--plate)}
+.rail__g{width:1.05rem;flex:none;text-align:center;font-size:0.8125rem;color:var(--pencil)}
+.rail__i[aria-current] .rail__g{color:var(--petrol)}
+.rail__t{white-space:nowrap;overflow:hidden}
+.app.is-collapsed .rail__t,.app.is-collapsed .rail__gl{display:none}
+.rail__toggle{margin:0 0 0.9rem 1rem;font-family:var(--mono);font-size:0.5625rem;letter-spacing:0.14em;text-transform:uppercase;background:none;border:1px solid var(--rule);color:var(--graphite);padding:0.2rem 0.4rem;cursor:pointer}
+
+/* ── top bar ────────────────────────────────────────────────────────────── */
+.main{min-width:0}
+.topbar{background:var(--chrome);color:var(--chrome-text);
+  display:flex;align-items:center;gap:0.3rem 0.85rem;flex-wrap:wrap;
+  padding:0.38rem clamp(0.6rem,1.2vw,0.9rem);font-size:0.625rem}
+.topbar__r1{display:contents}
+.topbar__fleet{order:1;display:flex;align-items:baseline;gap:0.5rem;flex-wrap:wrap;padding-right:0.7rem;border-right:1px solid var(--chrome-rule)}
+.topbar__mark{font-family:var(--mono);font-weight:600;font-size:0.625rem;letter-spacing:0.18em;text-transform:uppercase}
+.topbar__f{font-family:var(--mono);font-size:0.625rem;color:var(--chrome-text)}
+.topbar__right{order:3;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;margin-left:auto}
+/* the instrument strip: every wall-clock-live fact, on the dark chrome, in one row */
+.statusline{order:2;display:flex;flex-wrap:wrap;align-items:center;gap:0.3rem 0.8rem;font-family:var(--mono);font-size:0.625rem;color:var(--chrome-dim)}
+.statusline__i{display:inline-flex;gap:0.4rem;align-items:baseline}
+.statusline__k{letter-spacing:0.13em;text-transform:uppercase}
+.statusline__v{color:var(--chrome-text)}
+/* the discriminator truncates to 8 chars and gives its full value on hover */
+.trunc{border-bottom:1px dotted var(--chrome-rule);cursor:help}
+
+.newdata{display:inline-flex;align-items:center;gap:0.4rem;border:1px solid var(--chrome-accent);background:transparent;padding:0.15rem 0.45rem;font-family:var(--mono);font-size:0.625rem;white-space:nowrap;color:var(--chrome-text);cursor:pointer}
+.newdata__d{width:0.4rem;height:0.4rem;background:var(--chrome-accent);flex:none}
+.kbd{font-family:var(--mono);font-size:0.625rem;border:1px solid var(--chrome-rule);background:transparent;padding:0.05rem 0.3rem;color:var(--chrome-text)}
+.palette-hint{font-family:var(--mono);font-size:0.625rem;color:var(--chrome-dim);border:1px solid var(--chrome-rule);padding:0.12rem 0.4rem;background:transparent;display:inline-flex;gap:0.4rem;align-items:center;cursor:pointer}
+
+/* ── content ────────────────────────────────────────────────────────────── */
+.content{padding:0.7rem clamp(1rem,2.5vw,2.5rem) 5rem;max-width:74rem}
+
+/* ── section index: docked into the rail as indented children of DOCUMENT.
+   One rail does both jobs, the docs-site pattern, so two navigation systems stop
+   competing to highlight on scroll and the content column keeps its width. ── */
+.secnav{list-style:none;margin:0.15rem 0 0.35rem;padding:0}
+.secnav__a{display:block;font-family:var(--mono);font-size:0.625rem;letter-spacing:0.05em;color:var(--graphite);text-decoration:none;padding:0.22rem 0 0.22rem 0.85rem;margin-left:1.55rem;border-left:2px solid var(--rule)}
+.secnav__a:hover{color:var(--ink);border-left-color:var(--graphite);background:var(--paper-3)}
+.secnav__a[aria-current]{color:var(--ink);border-left-color:var(--petrol);font-weight:500}
+.secnav__st{display:block;font-size:0.5rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--pencil)}
+/* collapsed: labels go, scroll position stays legible as ticks */
+.app.is-collapsed .secnav__a{margin-left:1.1rem;padding:0.3rem 0 0.3rem 0.5rem;width:1.1rem;overflow:hidden;white-space:nowrap;color:transparent}
+.app.is-collapsed .secnav__st{display:none}
+
+/* ── document sections ──────────────────────────────────────────────────── */
+.sec{background:var(--plate);padding:0.9rem 1.1rem 1rem;margin-bottom:var(--gap-plate);scroll-margin-top:4rem}
+/* the hero is the page's single primary gauge and is not a plate */
+.sec--hero{background:transparent;padding:0.35rem 0 0.35rem;margin-bottom:calc(var(--gap-plate) * 1.4)}
+.sec__head{display:flex;align-items:baseline;justify-content:space-between;gap:0.4rem 1.25rem;flex-wrap:wrap;margin-bottom:var(--gap-in)}
+/* plate title: one size and one weight above the panel-internal label register */
+.plate__t{font-family:var(--mono);font-size:0.75rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink);margin:0}
+.sec__title{display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap}
+/* Major sections take the serif display tier. Mono small-caps is demoted to
+   panel-internal labels only, so the article voice lasts the whole scroll instead
+   of one section. */
+.sec__h{font-family:var(--display);font-variation-settings:'SOFT' 60,'WONK' 1,'opsz' 120;font-weight:600;font-size:clamp(1.375rem,2.4vw,1.75rem);letter-spacing:-0.018em;line-height:1.1;margin:0}
+/* Progressive density, newspaper style. The page has ONE lead: the meter face.
+   What changed keeps serif at reduced scale; worst holders and capacity drop to
+   the quiet mono register; trust is the footer. Six equal serif heads made six
+   magazine features of identical weight, which is a stack of articles rather than
+   one argument. */
+.sec__h--2{font-size:clamp(1.125rem,1.8vw,1.3125rem)}
+/* a half line naming the question a panel answers, read at scan speed */
+.role{font-family:var(--mono);font-size:0.6875rem;color:var(--graphite);margin:0.1rem 0 0.55rem}
+.stamp{font-family:var(--mono);font-size:0.6875rem;color:var(--graphite)}
+.stamp b{font-weight:500;color:var(--ink)}
+/* The document declares its stamp once. Sections that match stay quiet, so a
+   section that DEVIATES becomes visible by contrast rather than by volume. */
+.canon{font-family:var(--mono);font-size:0.75rem;color:var(--graphite);margin:0.5rem 0 0;padding-bottom:0.9rem;border-bottom:1px solid var(--rule)}
+.canon b{color:var(--ink);font-weight:500}
+.stamp--dev{color:var(--ink);border:1px solid var(--ink);background:var(--canvas);padding:0.2rem 0.5rem}
+.stamp--dev b{font-weight:600}
+
+/* ── the cut selector: product chrome, not test rig ──────────────────────
+   Ruled positions rather than a dropdown, because the set is small, closed and
+   worth seeing all of at once: which decomposition you are reading is the most
+   consequential fact about the panel and it should never be one click hidden.
+   Mono small caps and a hairline, so it reads as instrument furniture and does
+   not compete with the section head above it. */
+.cut{display:inline-flex;flex-wrap:wrap;gap:0;border:1px solid var(--rule);background:var(--canvas)}
+.cut__b{font-family:var(--mono);font-size:0.625rem;letter-spacing:0.12em;text-transform:uppercase;
+  border:0;border-right:1px solid var(--rule);background:transparent;color:var(--graphite);
+  padding:0.28rem 0.6rem;cursor:pointer}
+.cut__b:last-child{border-right:0}
+.cut__b[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.cut__l{font-family:var(--mono);font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--graphite);margin-right:0.5rem;align-self:center}
+/* the read, set large where the eye lands after the curve rather than above it */
+.read{font-family:var(--display);font-size:clamp(1.05rem,2.1vw,1.35rem);line-height:1.45;
+  color:var(--ink);margin:0.2rem 0 0.9rem;max-width:54ch}
+.read b{font-weight:600}
+.read--muted{color:var(--graphite)}
+
+/* ── info hover: definitions. Hover teaches. ────────────────────────────── */
+.info{position:relative;display:inline-flex}
+.info__btn{font-family:var(--mono);font-size:0.6875rem;line-height:1;width:1.1rem;height:1.1rem;border-radius:50%;border:1px solid var(--rule);background:var(--canvas);color:var(--graphite);cursor:help;display:inline-flex;align-items:center;justify-content:center;padding:0}
+.info__btn:hover,.info__btn:focus-visible{border-color:var(--ink);color:var(--ink)}
+.info__card{position:absolute;top:calc(100% + 0.5rem);left:0;z-index:60;width:min(28rem,80vw);background:var(--plate);border:1px solid var(--ink);box-shadow:0.25rem 0.25rem 0 var(--paper-3);padding:0.85rem 1rem;opacity:0;visibility:hidden;transition:opacity 110ms linear,visibility 110ms linear}
+.info:hover .info__card,.info:focus-within .info__card{opacity:1;visibility:visible}
+.info__card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:0.3rem 0.75rem}
+.info__card dt{font-family:var(--mono);font-size:0.5625rem;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:var(--graphite);padding-top:0.15rem}
+.info__card dd{margin:0;font-size:0.8125rem;line-height:1.45}
+
+/* ── honest-state chips ─────────────────────────────────────────────────── */
+.chip{display:inline-flex;align-items:baseline;gap:0.45rem;border:1px solid var(--rule);background:var(--canvas);padding:0.22rem 0.55rem;font-family:var(--mono);font-size:0.6875rem;letter-spacing:0.1em}
+.chip__mark{width:0.55rem;height:0.55rem;flex:none;align-self:center}
+.chip__s{text-transform:uppercase;font-weight:600;color:var(--ink);white-space:nowrap}
+.chip__pv{color:var(--graphite);text-transform:uppercase;letter-spacing:0.13em;font-size:0.625rem}
+.chip__v{color:var(--ink);font-weight:500;white-space:nowrap}
+.chip--fine .chip__mark{background:var(--petrol)}
+.chip--impaired .chip__mark{background:var(--crimson)}
+.chip--impaired{border-color:var(--crimson)}
+.chip--unexamined .chip__mark{background:repeating-linear-gradient(45deg,var(--graphite) 0 1.5px,var(--paper-2) 1.5px 4px)}
+.chip--indeterminate .chip__mark{background:var(--paper);border:1px solid var(--graphite);border-radius:50%}
+.chip--unobserved .chip__mark{background:var(--paper);border:1px dashed var(--graphite)}
+.chip--sm{font-size:0.625rem;padding:0.12rem 0.4rem}
+
+/* ── section states: empty and partial are DESIGNED, not fallbacks ──────── */
+.state-empty{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:repeating-linear-gradient(45deg,var(--canvas) 0 6px,var(--plate) 6px 12px);padding:1.3rem 1.1rem}
+.state-empty__t{margin:0 0 0.4rem}
+.state-empty__b{margin:0;font-size:0.875rem;color:var(--graphite);max-width:var(--measure)}
+.pf{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:0.35rem 2.5rem;font-family:var(--mono);font-size:0.75rem;margin:1rem 0 0}
+.pf__r{display:flex;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--rule-2);padding:0.28rem 0}
+.pf__k{color:var(--graphite);letter-spacing:0.1em;text-transform:uppercase;font-size:0.625rem}
+
+/* ── verdict lockup ─────────────────────────────────────────────────────── */
+.hero{display:grid;grid-template-columns:minmax(17rem,21rem) minmax(0,1fr);gap:1.75rem 3rem;align-items:start}
+@media (max-width:62rem){.hero{grid-template-columns:minmax(0,1fr)}}
+.lock__k{display:flex;align-items:center;gap:0.45rem;margin-bottom:0.35rem}
+.lock__p{display:flex;align-items:baseline;gap:0.4rem;flex-wrap:wrap}
+.lock__reg{font-family:var(--display);font-variation-settings:'SOFT' 40,'opsz' 144;font-weight:600;font-size:clamp(1.4rem,2.8vw,1.875rem);color:var(--petrol);line-height:1}
+.lock__n{font-size:clamp(2.75rem,6.5vw,4.25rem)}
+.lock__u{font-family:var(--mono);font-size:0.6875rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--graphite)}
+.lock__2{margin-top:1.35rem;padding-top:1rem;border-top:1px solid var(--rule-2)}
+.lock__n2{font-family:var(--mono);font-weight:500;font-size:clamp(1.4rem,3vw,1.875rem);letter-spacing:-0.02em;line-height:1}
+.gauge svg{display:block;width:100%;height:auto}
+
+/* ── realtime dashboard chrome ─────────────────────────────────────────────
+   This is an instrument someone opens daily, not a document they read once. Dense,
+   panelled, and visibly live. The only thing that moves on its own is the freshness
+   clock, which is what the motion law already permits: idle renders as honest idle
+   with the clock ticking. */
+.live{display:inline-flex;align-items:center;gap:0.4rem;font-family:var(--mono);font-size:0.625rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--chrome-text)}
+.live__d{width:0.45rem;height:0.45rem;background:var(--chrome-accent);flex:none}
+.live__d--idle{background:#6d756c}
+.live__t{font-variant-numeric:tabular-nums;color:var(--chrome-dim)}
+
+.ctxbar{display:flex;flex-wrap:wrap;gap:0.3rem 1.5rem;align-items:center;padding:0.45rem 0 0.9rem;font-family:var(--mono);font-size:0.6875rem;color:var(--graphite)}
+.ctxbar__i{display:inline-flex;gap:0.4rem;align-items:baseline}
+.ctxbar__k{letter-spacing:0.12em;text-transform:uppercase}
+.ctxbar__v{color:var(--ink)}
+
+/* KPI strip: the numbers an operator checks first, at a glance */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5rem,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:0.85rem 0 1.1rem}
+.kpi{background:var(--paper);padding:0.6rem 0.8rem}
+.kpi__v{font-family:var(--mono);font-weight:500;font-size:1.5rem;line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+.kpi__k{font-family:var(--mono);font-size:0.5625rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--graphite);margin-top:0.3rem}
+.kpi--wide .kpi__v{font-size:1.25rem}
+
+/* supporting sections are panels again. A dashboard is panelled; an article is not. */
+.panel-box{background:var(--plate);padding:0.9rem 1rem 1rem}
+
+/* ── the meter face: the hero is the chart, with the figure at its live edge ──
+   The daily question is not "what is my absolute repeat compute", which at steady
+   state is the same number every morning. It is "am I fine, and did anything move",
+   and that answer is state plus trajectory. So the figure is composed at the now
+   end of its own history: it stops being an isolated numeral and becomes the
+   endpoint of a series that visibly moved to get there. */
+.meter{margin-top:0.35rem}
+/* a compact status readout, not a typeset sentence */
+.verdict-line{font-family:var(--mono);font-size:0.8125rem;line-height:1.5;color:var(--graphite);max-width:52rem;margin:0.5rem 0 0}
+.verdict-line b{color:var(--ink);font-weight:500}
+.hero-top{display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap}
+
+/* the decomposition docks under the hero as its own detail, not a peer panel */
+.decomp{margin-top:0.85rem}
+.decomp__rows{list-style:none;margin:0.4rem 0 0;padding:0}
+.decomp__r{display:flex;align-items:baseline;gap:0.9rem;padding:0.4rem 0;border-top:1px solid var(--rule-2);font-family:var(--mono);font-size:0.75rem;cursor:pointer}
+.decomp__r:hover{background:var(--plate)}
+.decomp__r:hover .chev{color:var(--ink)}
+.decomp__n{width:6rem;flex:none}
+.decomp__bar{flex:1 1 4rem;height:0.45rem;background:var(--paper-2);min-width:3rem}
+.decomp__bar i{display:block;height:100%;background:var(--petrol)}
+.decomp__v{min-width:6rem;text-align:right;flex:none}
+.decomp__c{min-width:4rem;text-align:right;flex:none;color:var(--graphite)}
+
+/* ── charts ─────────────────────────────────────────────────────────────── */
+.chart{width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+.chart svg{display:block;width:100%;min-width:30rem;height:auto}
+.footnotes{margin:0.6rem 0 0;padding:0;list-style:none;display:grid;gap:0.35rem}
+.footnote{font-family:var(--mono);font-size:0.6875rem;color:var(--graphite);display:flex;gap:0.6rem}
+.footnote__d{color:var(--ink);flex:none}
+/* marker chips ANCHOR (terse, clickable). Footnotes carry the detail. */
+.anchors{display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.5rem}
+.anchor{font-family:var(--mono);font-size:0.625rem;letter-spacing:0.08em;border:1px solid var(--rule);border-left:2px solid var(--ink);background:var(--plate);padding:0.22rem 0.5rem;color:var(--ink);text-decoration:none}
+.anchor:hover{background:var(--canvas)}
+.anchor b{font-weight:600}
+
+/* ── tables ─────────────────────────────────────────────────────────────── */
+.tbl-wrap{width:100%;overflow-x:auto;overscroll-behavior-x:contain;border:1px solid var(--rule);background:var(--plate)}
+.tbl{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:0.75rem;min-width:44rem}
+.tbl thead th{position:sticky;top:0;background:var(--paper-3);z-index:2;text-align:left;font-weight:500;font-size:0.625rem;letter-spacing:0.13em;text-transform:uppercase;color:var(--graphite);padding:0.5rem 0.7rem;border-bottom:1px solid var(--ink);white-space:nowrap}
+.tbl thead th[aria-sort]{color:var(--ink);cursor:pointer}
+.tbl td{padding:0.4rem 0.7rem;border-bottom:1px solid var(--rule-2);white-space:nowrap}
+.tbl tbody tr:hover{background:var(--canvas)}
+.tbl .n{text-align:right}
+.tbl .unit{color:var(--pencil)}
+.tbl__scale{display:inline-block;height:0.45rem;background:var(--petrol);vertical-align:middle}
+/* click descends: a row that drills says so with a chevron */
+.tbl tbody tr.is-drill{cursor:pointer}
+.tbl tbody tr.is-drill:hover .chev{color:var(--ink)}
+.chev{color:var(--pencil)}
+.dbar{display:inline-flex;width:6.5rem;height:0.5rem;background:var(--paper-2);position:relative;vertical-align:middle}
+.dbar__mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--rule)}
+.dbar__f{position:absolute;top:0;bottom:0;background:var(--graphite)}
+.refused b{color:var(--ink);font-weight:500}
+
+/* the comparison window cards: rules and whitespace, no box. Boxed panels are
+   what make an editorial page read as widgets pasted into an article. */
+.wcard{border-top:1px solid var(--ink);padding:0.6rem 0 0}
+.wcard--b{border-top-color:var(--rule)}
+
+/* ── notices ────────────────────────────────────────────────────────────── */
+.notice{border-left:3px solid var(--graphite);background:var(--canvas);padding:0.95rem 1.15rem;margin:1.25rem 0 0;max-width:54rem}
+.notice--finding{border-left-color:var(--crimson)}
+.notice--finding .notice__h{color:var(--crimson)}
+.notice__h{margin:0 0 0.4rem}
+.notice__b{margin:0;font-size:0.875rem;line-height:1.55}
+.notice__r{margin:0.5rem 0 0;font-size:0.875rem;color:var(--graphite)}
+
+/* ── trust strip: the document footer ───────────────────────────────────── */
+.trust{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem 1.5rem;padding:0.5rem 0 0}
+@media (max-width:72rem){.trust{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:40rem){.trust{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* the chips carry counts; this returns the at-a-glance proportion for 4px */
+.fleetbar{display:flex;height:4px;background:var(--paper-2);margin:0.9rem 0 0.6rem}
+.fleetbar span{height:100%}
+.trust__v{font-family:var(--mono);font-weight:500;font-size:1.375rem;line-height:1;letter-spacing:-0.02em}
+.trust__u{font-family:var(--mono);font-size:0.625rem;color:var(--graphite);letter-spacing:0.13em;text-transform:uppercase;margin-top:0.3rem}
+.trust__chips{display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.9rem}
+
+/* ── breadcrumbs, drill pages ───────────────────────────────────────────── */
+.crumbs{display:flex;gap:0.45rem;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:0.6875rem;color:var(--graphite);padding:1.25rem 0 0.35rem}
+.crumbs a{color:var(--graphite);text-decoration:none;border-bottom:1px solid var(--rule)}
+.crumbs a:hover{color:var(--ink)}
+.crumbs__s{color:var(--pencil)}
+.level{font-family:var(--mono);font-size:0.5625rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--pencil);border:1px solid var(--rule-2);padding:0 0.3rem}
+
+/* ── evidence: level 2, terminal ────────────────────────────────────────── */
+.evidence{border:1px solid var(--ink);background:var(--plate);margin-top:1.25rem}
+.evidence__h{background:var(--ink);color:var(--paper);padding:0.45rem 0.8rem;font-family:var(--mono);font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.evidence__f{padding:0.6rem 0.8rem;font-family:var(--mono);font-size:0.6875rem;color:var(--graphite);border-top:1px solid var(--rule)}
+
+/* ── facts grid ─────────────────────────────────────────────────────────── */
+.ratio{display:inline-block;width:6rem;height:0.4rem;background:var(--paper-3);vertical-align:middle;margin-right:0.5rem}
+.ratio i{display:block;height:100%;background:var(--ochre)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:1.25rem 2.5rem}
+.fact{border-left:2px solid var(--rule);padding-left:0.85rem}
+.fact__v{font-family:var(--mono);font-weight:500;font-size:1.375rem;line-height:1.05;letter-spacing:-0.02em}
+.fact__u{font-family:var(--mono);font-size:0.6875rem;color:var(--graphite);letter-spacing:0.13em;text-transform:uppercase}
+
+/* ── command palette ────────────────────────────────────────────────────── */
+.pal{position:fixed;inset:0;z-index:90;background:rgba(26,29,26,0.35);display:none;align-items:flex-start;justify-content:center;padding-top:12vh}
+.pal.is-open{display:flex}
+.pal__box{width:min(34rem,92vw);background:var(--plate);border:1px solid var(--ink);box-shadow:0.4rem 0.4rem 0 rgba(26,29,26,0.25)}
+.pal__in{width:100%;border:0;border-bottom:1px solid var(--rule);background:var(--plate);padding:0.8rem 1rem;font-family:var(--mono);font-size:0.875rem;color:var(--ink)}
+.pal__in:focus{outline:none}
+.pal__l{list-style:none;margin:0;padding:0;max-height:22rem;overflow-y:auto}
+.pal__i{display:flex;justify-content:space-between;gap:1rem;padding:0.5rem 1rem;font-family:var(--mono);font-size:0.75rem;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule-2)}
+.pal__i:hover,.pal__i.is-sel{background:var(--canvas)}
+.pal__g{color:var(--pencil);font-size:0.625rem;letter-spacing:0.13em;text-transform:uppercase}
+
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible,tr:focus-visible{outline:2px solid var(--petrol);outline-offset:2px}
+.syn{font-family:var(--mono);font-size:0.5625rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--pencil);border:1px solid var(--rule-2);padding:0 0.25rem;vertical-align:0.15em}
+
+/* ── motion law: movement only when data landed or the user acted ───────── */
+@keyframes row-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+@keyframes resolve{from{opacity:0}to{opacity:1}}
+.is-arriving{animation:row-in 160ms steps(3,end) both}
+.is-resolving{animation:resolve 220ms ease-out both}
+@media (prefers-reduced-motion:reduce){
+  .is-arriving,.is-resolving{animation:none!important;opacity:1!important;transform:none!important}
+  .info__card{transition:none}
+}
+@media (max-width:52rem){
+  /* The info card is anchored to its button, so a button near the right edge
+     pushed a 312px card past the viewport and the body scrolled sideways. On
+     narrow widths the card leaves the flow entirely and pins to the viewport. */
+  .info__card{position:fixed;left:0.75rem;right:0.75rem;top:auto;bottom:0.75rem;width:auto}
+
+  /* The section index cannot live inside a horizontal rail: destinations and
+     section anchors wrapped into each other. The rail keeps destinations only,
+     and the document is one scroll, so the anchor list is not load-bearing here. */
+  .secnav{display:none}
+
+  .app{grid-template-columns:1fr;background:none}
+  .rail{background:var(--rail-bg);position:static;height:auto;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:0.25rem;padding:0.5rem}
+  .rail__grp{margin:0;display:flex;flex-wrap:wrap;gap:0.25rem}
+  .rail__gl,.rail__toggle{display:none}
+  .rail__i{border-left:0;border-bottom:2px solid transparent;padding:0.3rem 0.5rem}
+  .rail__i[aria-current]{border-left:0;border-bottom-color:var(--petrol);background:transparent}
+}

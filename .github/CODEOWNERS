@@ -1,0 +1,23 @@
+# Review routing. One line per area, because the layer rules (eslint-rules/layers.js) are the
+# boundary map: a change inside an area is reviewed by whoever owns that boundary. The owner
+# is a placeholder until maintainers are named per area; the FILE is the mechanism, and a
+# later line only ever narrows an earlier one.
+
+*                          @fishercort
+
+# The layers, from the seam outward.
+/src/config/               @fishercort
+/src/domain/               @fishercort
+/src/data/                 @fishercort
+/src/design-system/        @fishercort
+/src/features/             @fishercort
+/src/app/                  @fishercort
+
+# The contract a change here can break for someone else.
+/contract/                 @fishercort
+/test/                     @fishercort
+
+# How it is checked and how it ships.
+/.github/                  @fishercort
+/scripts/                  @fishercort
+/eslint-rules/             @fishercort

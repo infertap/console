@@ -1,0 +1,121 @@
+THIRD-PARTY NOTICES — InferTap console
+
+The InferTap console is licensed under the AGPL-3.0-only (see LICENSE). It redistributes the components below, which remain
+under their own licences.
+
+This covers what the built bundle SHIPS: the runtime dependency closure, and the fonts
+vendored into the source tree. Build tooling is excluded because it does not enter the
+bundle. The console is compiled into the analyzer binary, so these notices travel with the
+analyzer's own.
+
+==============================================================================
+
+Fonts bundled into the stylesheet:
+
+IBM Plex Sans, IBM Plex Mono
+    Files:      src/design-system/fonts/ibm-plex-*.woff2
+    Licence:    SIL Open Font License, Version 1.1
+    Source:     https://github.com/IBM/plex
+    Copyright © 2017 IBM Corp. with Reserved Font Name "Plex"
+
+    The SIL Open Font License permits bundling these fonts with software, including
+    commercial software, and requires that this copyright notice and the licence
+    accompany them. The full licence text is at https://openfontlicense.org and in the
+    upstream repository named above.
+
+Fraunces
+    Files:      src/design-system/fonts/fraunces-latin-full-normal.woff2
+    Licence:    SIL Open Font License, Version 1.1
+    Source:     https://github.com/undercasetype/Fraunces
+    Copyright 2018 The Fraunces Project Authors (https://github.com/undercasetype/Fraunces)
+
+    The SIL Open Font License permits bundling these fonts with software, including
+    commercial software, and requires that this copyright notice and the licence
+    accompany them. The full licence text is at https://openfontlicense.org and in the
+    upstream repository named above.
+
+==============================================================================
+
+JavaScript packages (3):
+
+react 19.2.8
+    Licence:    MIT
+    Repository: https://github.com/react/react
+    --- LICENSE ---
+MIT License
+
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+react-dom 19.2.8
+    Licence:    MIT
+    Repository: https://github.com/react/react
+    --- LICENSE ---
+MIT License
+
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+scheduler 0.27.0
+    Licence:    MIT
+    Repository: https://github.com/facebook/react
+    --- LICENSE ---
+MIT License
+
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+

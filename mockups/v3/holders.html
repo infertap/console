@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ranks · infertap console</title>
+<link rel="stylesheet" href="../assets/console-v2.css">
+<link rel="stylesheet" href="../assets/console-v3.css">
+<style>
+  .cov-bar{display:inline-block;width:2.5rem;height:.35rem;background:var(--paper-3);vertical-align:middle;margin-right:.4rem}
+  .cov-bar i{display:block;height:100%;background:var(--seq-4)}
+  .cov-bar--low i{background:var(--crimson)}
+  .tbl-wrap{max-height:44rem;overflow-y:auto}
+  .pager{display:flex;gap:0.75rem;align-items:baseline;margin-top:0.5rem;font-family:var(--mono);font-size:0.6875rem}
+  .pager button{font-family:var(--mono);font-size:0.625rem;letter-spacing:0.1em;text-transform:uppercase;
+    border:1px solid var(--rule);background:var(--canvas);color:var(--ink);padding:0.22rem 0.55rem;cursor:pointer}
+  .pager button:hover:not(:disabled){background:var(--paper-3)}
+  .pager button:disabled{color:var(--pencil);cursor:default}
+</style>
+</head>
+<!--
+  V3 RANKS — level 1, the breakdown's full-depth floor.
+
+  What changed from v2/holders.html, per the ruling set:
+    · "holders" is internal vocabulary; the glass says RANKS and ENGINES
+    · WINDOW CONTINUITY: the page reads the same win/from/to params the
+      dashboard emits, so a drill from a 3 h view lands on 3 h numbers, states
+      its window in the block head, and offers the same window control
+    · model column added (a rollup key; absence renders undeclared)
+    · the prose footer died: counts became a stamp, definitions moved to hover
+    · headings on canvas, one titled panel, controls inside it (containment)
+    · real paging instead of a silent 220-row cap
+  DATA IS SYNTHETIC SCAFFOLDING (mockbar). Cursor-stale handling is a live-API
+  behavior the shipped console already has; a static mock cannot demo it.
+-->
+<body>
+<div class="app"><div class="main"><div class="content">
+  <div id="crumbs"></div>
+  <h1 class="h1">Ranks</h1>
+  <section class="sec"><div id="s-ranks"></div></section>
+</div></div></div>
+
+<script src="../assets/data-v2.js"></script>
+<script src="../assets/console-v2.js"></script>
+<script>
+mockbar(null);
+frame("Holders");
+document.getElementById("crumbs").appendChild(crumbs([
+  { label: "Dashboard", href: "index.html" },
+  { label: "Breakdown", href: "index.html?cut=instance#waste" },
+  { label: "Ranks" }], 1));
+
+/* the rail holds only v3 destinations; retired and v2-only surfaces leave it */
+document.querySelectorAll(".rail__i, .pal__i").forEach(a => {
+  const href = a.getAttribute("href") || "";
+  if (/^(reports|about|declared-inputs)\.html$/.test(href)) { a.remove(); return; }
+  if (/^holder\.html/.test(href)) a.setAttribute("href", "../v2/" + href);
+  const t = a.querySelector(".rail__t");
+  if (t && t.textContent === "Holders") t.textContent = "Ranks";
+});
+document.querySelectorAll(".rail__grp").forEach(g => { if (!g.querySelector(".rail__i")) g.remove(); });
+document.querySelectorAll(".statusline__i").forEach(i => {
+  const k = i.querySelector(".statusline__k");
+  if (!k) return;
+  if (k.textContent === "segment") {
+    const v = i.querySelector(".statusline__v");
+    if (v) { v.setAttribute("title", "segment " + CTX.status.last_segment); v.textContent = CTX.status.last_segment_at; }
+  }
+  if (k.textContent === "discriminator") k.textContent = "analysis";
+});
+
+/* ── window continuity: same params the dashboard emits ────────────────────── */
+const MIN_MS = 60000, DAY_MS2 = 86400000;
+const normDT = s => s && s.length === 10 ? s + "T00:00" : s;
+const dtMs = s => new Date(s + ":00Z").getTime();
+const mdOf = ms => new Date(ms).toISOString().slice(5, 10);
+const hhmm = ms => { const d = new Date(ms); return String(d.getUTCHours()).padStart(2, "0") + ":" + String(d.getUTCMinutes()).padStart(2, "0"); };
+const PRESETS = { "14d": { label: "14 d", days: 14 }, "48h": { label: "48 h", days: 2 }, "3h": { label: "3 h", days: 0.125 } };
+let WIN = qs("win") || "14d";
+let FROM = normDT(qs("from")) || "2026-08-03T09:00", TO = normDT(qs("to")) || "2026-08-03T14:00";
+function winInfo() {
+  if (WIN !== "custom") return { key: WIN, ...PRESETS[WIN] };
+  let A = dtMs(FROM), B = dtMs(TO);
+  if (A > B) { const t = A; A = B; B = t; }
+  if (B - A < 10 * MIN_MS) B = A + 10 * MIN_MS;
+  const label = mdOf(A) === mdOf(B) ? mdOf(A) + " " + hhmm(A) + "→" + hhmm(B) : mdOf(A) + "→" + mdOf(B);
+  return { key: "custom", label, days: (B - A) / DAY_MS2 };
+}
+function syncURL() {
+  const u = new URLSearchParams(location.search);
+  u.set("win", WIN); u.set("from", FROM); u.set("to", TO);
+  if (CLASS_FILTER) u.set("class", CLASS_FILTER);
+  history.replaceState(null, "", "?" + u);
+}
+
+const CLASS_FILTER = qs("class");
+const MODELS = n => n % 20 < 12 ? "llama-3-70b" : n % 20 < 19 ? "qwen-32b" : "undeclared";
+/* the v2 data world names workloads differently; the glass speaks the v3 names */
+const WL = w => ({ "chat-serve": "chat-prod", "batch-embed": "rag-batch", "agentic-tools": "code-assist" })[w] || w;
+const PER_PAGE = 200;
+let sortKey = "tokens", sortDir = -1, stateFilter = "all", page = 0;
+
+const COLS = [
+  { k: "rank", t: "rank", n: false, sort: r => r.instance + r.dp_rank },
+  { k: "workload", t: "workload", n: false, sort: r => r.workload },
+  { k: "model", t: "model", n: false, sort: r => MODELS(parseInt(r.instance.slice(1), 10) || 0) },
+  { k: "tokens", t: "repeat compute", n: true, sort: r => r.tokens },
+  { k: "share", t: "share", n: true, sort: r => r.tokens, tip: "of the fleet total for this window" },
+  { k: "events", t: "events", n: true, sort: r => r.events, tip: "classified stores behind the mass · mass ÷ events = average tokens per store" },
+  { k: "coverage", t: "coverage", n: true, sort: r => r.coverage, tip: "token-weighted · qualifies this row's figures" },
+  { k: "state", t: "state", n: false, sort: r => r.state, tip: "the rank's honest state when the analysis last covered it" },
+  { k: "chev", t: "", n: false, sort: r => 0 }
+];
+
+function render() {
+  const mount = document.getElementById("s-ranks");
+  mount.replaceChildren();
+  const w = winInfo();
+  const scale = w.days / 14;
+
+  const panel = h("div", { class: "blk" });
+  panel.appendChild(blkHead("repeat compute per rank · fleet · " + w.label, [info("holders", "repeat compute per rank")]));
+
+  const controls = [];
+  controls.push(["window", Object.entries(PRESETS).map(([k, p]) => [k, p.label]).concat([["custom", "custom"]]),
+    WIN, k => { WIN = k; page = 0; }]);
+  controls.push(["state", [["all", "all"], ["fine", "fine"], ["impaired", "impaired"], ["indeterminate", "indeterminate"]],
+    stateFilter, k => { stateFilter = k; page = 0; }]);
+  const bar = h("div", { style: "display:flex;flex-wrap:wrap;gap:1.25rem;align-items:center;margin:0.6rem 0 0.8rem" });
+  controls.forEach(([label, opts, current, onPick]) => {
+    const g = h("div", { style: "display:flex;align-items:center" });
+    g.appendChild(h("span", { class: "cut__l" }, label));
+    const c = h("div", { class: "cut" });
+    opts.forEach(([k, text]) => {
+      const b = h("button", { class: "cut__b", type: "button" }, text);
+      b.setAttribute("aria-pressed", String(k === current));
+      b.addEventListener("click", () => { onPick(k); syncURL(); render(); });
+      c.appendChild(b);
+    });
+    g.appendChild(c);
+    bar.appendChild(g);
+  });
+  if (CLASS_FILTER) {
+    const c = h("span", { class: "chip chip--fine chip--sm" });
+    c.innerHTML = "<span class='chip__pv'>class</span><span class='chip__v'>" + CLASS_FILTER + "</span>";
+    bar.appendChild(c);
+  }
+  panel.appendChild(bar);
+
+  if (WIN === "custom") {
+    const row = h("div", { class: "rangerow" });
+    row.appendChild(h("span", { class: "cut__l" }, "range"));
+    [[FROM, v => { FROM = v; }], [TO, v => { TO = v; }]].forEach(([val, set]) => {
+      const inp = h("input", { class: "rangein", type: "datetime-local", value: val,
+        min: "2021-08-04T00:00", max: TODAY + "T23:59", step: "300" });
+      inp.addEventListener("change", () => { if (inp.value) { set(inp.value); page = 0; syncURL(); render(); } });
+      row.appendChild(inp);
+    });
+    panel.appendChild(row);
+  }
+
+  const col = COLS.find(c => c.k === sortKey);
+  const rows = HOLDERS.filter(r => stateFilter === "all" || r.state === stateFilter).slice()
+    .sort((a, b) => (col.sort(a) > col.sort(b) ? 1 : col.sort(a) < col.sort(b) ? -1 : 0) * sortDir);
+  const pageRows = rows.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
+  const max = Math.max(...rows.map(r => r.tokens), 1);
+
+  const wrap = h("div", { class: "tbl-wrap" });
+  const tbl = h("table", { class: "tbl" });
+  const hrow = h("tr");
+  COLS.forEach(c => {
+    const th = h("th", { scope: "col" });
+    th.className = c.n ? "n" : "";
+    th.innerHTML = c.t + (c.t ? " <span class='sortmark'></span>" : "");
+    if (c.tip) th.title = c.tip;
+    if (c.k !== "chev") {
+      th.setAttribute("tabindex", "0");
+      if (c.k === sortKey) { th.setAttribute("aria-sort", sortDir === -1 ? "descending" : "ascending"); th.querySelector(".sortmark").textContent = sortDir === -1 ? "▼" : "▲"; }
+      const act = () => { if (sortKey === c.k) sortDir *= -1; else { sortKey = c.k; sortDir = -1; } page = 0; render(); };
+      th.addEventListener("click", act);
+      th.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } });
+    }
+    hrow.appendChild(th);
+  });
+  const thead = h("thead"); thead.appendChild(hrow); tbl.appendChild(thead);
+  const tb = h("tbody");
+  pageRows.forEach(hd => {
+    const tr = h("tr", { class: "is-drill", tabindex: "0" });
+    tr.appendChild(h("td", {}, holderName(hd)));
+    tr.appendChild(h("td", {}, hd.workload === "unattributed" ? "<span class='unit'>unattributed</span>" : WL(hd.workload)));
+    const mdl = MODELS(parseInt(hd.instance.slice(1), 10) || 0);
+    tr.appendChild(h("td", {}, mdl === "undeclared" ? "<span class='unit'>undeclared</span>" : mdl));
+    const tk = (CLASS_FILTER === "ETR" ? hd.etr : CLASS_FILTER === "post_clear" ? hd.post_clear : hd.tokens) * scale;
+    tr.appendChild(h("td", { class: "n" }, "≥ " + int(tk)));
+    const sh = h("td", { class: "n" });
+    const sp = h("span", { class: "tbl__scale" });
+    sp.style.width = Math.max(2, hd.tokens / max * 60) + "px";
+    sh.appendChild(sp);
+    sh.appendChild(h("span", { class: "unit", style: "margin-left:.4rem" }, pct(hd.tokens / WASTE_FULL, 2)));
+    tr.appendChild(sh);
+    tr.appendChild(h("td", { class: "n" }, int(hd.events * scale)));
+    const cv = h("td", { class: "n" });
+    cv.innerHTML = "<span class='cov-bar" + (hd.coverage < 0.75 ? " cov-bar--low" : "") + "'><i style='width:" +
+      (hd.coverage * 100).toFixed(0) + "%'></i></span>" + pct(hd.coverage, 1);
+    tr.appendChild(cv);
+    const st = h("td");
+    const chip = chipEl(hd.state, null, null);
+    chip.querySelectorAll(".chip__pv").forEach(x => { chip.setAttribute("title", x.textContent); x.remove(); });
+    st.appendChild(chip); tr.appendChild(st);
+    tr.appendChild(h("td", { class: "chev" }, "›"));
+    const go = () => location.href = "../v2/holder.html?id=" + hd.id;
+    tr.addEventListener("click", go);
+    tr.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb); wrap.appendChild(tbl); panel.appendChild(wrap);
+
+  const pager = h("div", { class: "pager" });
+  const prev = h("button", { type: "button" }, "‹ prev");
+  const next = h("button", { type: "button" }, "next ›");
+  prev.disabled = page === 0;
+  next.disabled = (page + 1) * PER_PAGE >= rows.length;
+  prev.addEventListener("click", () => { page--; render(); });
+  next.addEventListener("click", () => { page++; render(); });
+  const stamp = h("span", { class: "stamp",
+    title: "coverage qualifies each row's figures; state qualifies the rank when the analysis last covered it. Rank drill is event grain, bounded to the last " + CTX.raw_horizon_days + " d." });
+  stamp.innerHTML = "rows <b>" + (rows.length ? page * PER_PAGE + 1 : 0) + "–" + Math.min((page + 1) * PER_PAGE, rows.length) +
+    "</b> of <b>" + rows.length + "</b> matching · <b>" + POP.holders_listable + "</b> ranks observed · <b>" +
+    POP.holders_unexamined + "</b> not yet analyzed";
+  pager.appendChild(prev); pager.appendChild(next); pager.appendChild(stamp);
+  panel.appendChild(pager);
+
+  mount.appendChild(panel);
+}
+function blkHead(text, extras) {
+  const r = h("div", { class: "blk__head" });
+  r.appendChild(h("h4", { class: "plate__t" }, text));
+  (extras || []).forEach(x => r.appendChild(x));
+  return r;
+}
+render();
+</script>
+</body>
+</html>

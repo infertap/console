@@ -1,0 +1,71 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+/* Level 1 and level 2 pages. Every drill page is URL addressable and carries a
+   breadcrumb back to the section that owns it, because a page reached by clicking
+   must be reachable by pasting. */
+
+.page {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 6rem;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  margin: 0 0 0.6rem;
+}
+
+.crumbs a {
+  color: var(--graphite);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+
+.crumbs a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.sep {
+  color: var(--pencil);
+}
+
+.title {
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  font-size: clamp(1.0625rem, 1.9vw, 1.3125rem);
+  margin: 0 0 0.15rem;
+}
+
+/* Level 2 says so. There is nothing beneath it, and a reader who has descended
+   three times should be told they have arrived rather than left looking. */
+.terminal {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  border: 1px solid var(--rule);
+  padding: 0.15rem 0.4rem;
+  margin-left: 0.5rem;
+}
+
+.stamp {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  color: var(--graphite);
+  margin: 0 0 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.stamp b {
+  color: var(--ink);
+  font-weight: 500;
+}

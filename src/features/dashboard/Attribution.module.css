@@ -1,0 +1,49 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+.index {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.8rem;
+}
+
+/* Marker chips are controls: boxed, per the affordance rule; pressed is ink. */
+.marker {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--ink);
+  background: var(--plate);
+  padding: 0.22rem 0.5rem;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.marker:hover {
+  background: var(--canvas);
+}
+
+.marker b {
+  font-weight: 600;
+}
+
+.marker[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.note {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--graphite);
+  min-height: 1.15rem;
+  margin: 0;
+}

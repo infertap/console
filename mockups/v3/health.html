@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health · infertap console</title>
+<link rel="stylesheet" href="../assets/console-v2.css">
+<link rel="stylesheet" href="../assets/console-v3.css">
+<style>
+  .meter{display:inline-block;height:.45rem;width:4.5rem;background:var(--paper-3);vertical-align:middle;margin-right:.4rem}
+  .meter i{display:block;height:100%;background:var(--seq-4)}
+  .meter--low i{background:var(--crimson)}
+</style>
+</head>
+<!--
+  V3 HEALTH — level 1, where a nonzero trust chip gets INVESTIGATED.
+
+  Surgery from v2/health.html, per the ruling set and the product's own history:
+    · "Model identity, observed never declared" REVERSED — the probe was
+      retracted (§11.14); model is DECLARED (topic template or --provenance).
+      The v2 remedy text was literally the retracted mechanism.
+    · "Recovery" section DELETED — backup was removed 2026-08-16; recovery is
+      replay from the customer's bucket. Gauges for deleted machinery lie.
+    · ADDED the two tables this page exists for and v2 lacked: the DELIVERY
+      LEDGER (per tap process: captured / declared dropped / missing with no
+      declaration) and the STALENESS investigation table (who is silent, last
+      heard, each run's own threshold).
+    · dashboard-duplicate chips and basis-theory prose removed; the per-engine
+      two-basis table stays, because per-engine DIVERGENCE is the diagnostic.
+    · headings on canvas, titled blocks, plain words, numbers first.
+  DATA IS SYNTHETIC SCAFFOLDING (mockbar).
+-->
+<body>
+<div class="app"><div class="main"><div class="content">
+  <div id="crumbs"></div>
+  <h1 class="h1">Health</h1>
+  <section class="sec" id="delivery"><div id="s-delivery"></div></section>
+  <section class="sec" id="stale"><div id="s-stale"></div></section>
+  <section class="sec" id="cov"><div id="s-cov"></div></section>
+  <section class="sec" id="model"><div id="s-model"></div></section>
+  <section class="sec" id="ingest"><div id="s-ingest"></div></section>
+</div></div></div>
+
+<script src="../assets/data-v2.js"></script>
+<script src="../assets/console-v2.js"></script>
+<script>
+mockbar(null);
+frame("Health");
+document.getElementById("crumbs").appendChild(crumbs([
+  { label: "Dashboard", href: "index.html" }, { label: "Trust", href: "index.html#trust" }, { label: "Health" }], 1));
+/* the rail holds only v3 destinations; retired and v2-only surfaces leave it */
+document.querySelectorAll(".rail__i, .pal__i").forEach(a => {
+  const href = a.getAttribute("href") || "";
+  if (/^(reports|about|declared-inputs)\.html$/.test(href)) { a.remove(); return; }
+  if (/^holder\.html/.test(href)) a.setAttribute("href", "../v2/" + href);
+  const t = a.querySelector(".rail__t");
+  if (t && t.textContent === "Holders") t.textContent = "Ranks";
+});
+document.querySelectorAll(".rail__grp").forEach(g => { if (!g.querySelector(".rail__i")) g.remove(); });
+document.querySelectorAll(".statusline__i").forEach(i => {
+  const k = i.querySelector(".statusline__k");
+  if (!k) return;
+  if (k.textContent === "segment") {
+    const v = i.querySelector(".statusline__v");
+    if (v) { v.setAttribute("title", "segment " + CTX.status.last_segment); v.textContent = CTX.status.last_segment_at; }
+  }
+  if (k.textContent === "discriminator") k.textContent = "analysis";
+});
+
+DEFS.delivery = {
+  measures: "whether every sealed segment the taps produced actually arrived, per tap process. Expected counts come from each process's own segment sequence numbers, so a gap is arithmetic, not a guess.",
+  computed: "captured = segments acknowledged into the ledger; declared dropped = the tap said it reclaimed them (ring pressure) and named the range; missing with no declaration = a sequence gap nothing accounts for — the finding.",
+  basis: "per tap process · a restarted engine is a new process",
+  bound: "covers the stamped window; a process that never spoke leaves no trace and cannot appear here"
+};
+DEFS.staleness = {
+  measures: "which tap processes have gone quiet, and for how long past their own threshold.",
+  computed: "each process's threshold is derived from its own declarations: max(declared cadence, 3 × its median observed spacing). A slow-heartbeat process widens its own threshold and does not false-alarm.",
+  basis: "per process (incarnation) · a rolling deploy reads as a departure and an arrival, never a fleet outage",
+  bound: "silent means past threshold with no stop record — the absence of the goodbye is the signal"
+};
+DEFS.cov2 = {
+  measures: "both coverage bases per engine. Instance-time: was telemetry present at all. Token-weighted: at what coverage the mass was observed.",
+  computed: "instance-time = covered time ÷ window time. Token-weighted = coverage summed over tokens ÷ tokens.",
+  basis: "an engine can sit high on one basis and low on the other — a few blind minutes that held most of the mass. The divergence is the diagnostic.",
+  bound: "stamped window"
+};
+DEFS.model2 = {
+  measures: "which engines carry a declared model identity, which is what fences cross-engine comparisons.",
+  computed: "declared via the kv-events topic template (kv@pod@model) or a model key in --provenance — the same value that feeds the engine's launch, so serving breaks before the label drifts. Never probed, never guessed; absence stays null.",
+  basis: "cross-engine findings (duplication, placement) compare only within a shared model group",
+  bound: "an undeclared engine's cross-engine findings are indeterminate; its per-engine figures are unaffected"
+};
+
+function blkHead(text, extras) {
+  const r = h("div", { class: "blk__head" });
+  r.appendChild(h("h4", { class: "plate__t" }, text));
+  (extras || []).forEach(x => r.appendChild(x));
+  return r;
+}
+function kpis(pairs) {
+  const g = h("div", { class: "kpis" });
+  pairs.forEach(([v, k, wide, tip]) => {
+    const d = h("div", { class: "kpi" + (wide ? " kpi--wide" : "") });
+    if (tip) d.setAttribute("title", tip);
+    d.appendChild(h("div", { class: "kpi__v" }, v));
+    d.appendChild(h("div", { class: "kpi__k" }, k));
+    g.appendChild(d);
+  });
+  return g;
+}
+function table(cols, rows) {
+  const wrap = h("div", { class: "tbl-wrap" });
+  const tbl = h("table", { class: "tbl", style: "min-width:0" });
+  tbl.innerHTML = "<thead><tr>" + cols.map(c => "<th class='" + (c.n ? "n" : "") + "'" +
+    (c.tip ? " title=\"" + c.tip + "\"" : "") + ">" + c.t + "</th>").join("") + "</tr></thead>";
+  const tb = h("tbody");
+  rows.forEach(cells => {
+    const tr = h("tr");
+    cells.forEach((cell, i) => {
+      const td = h("td", { class: cols[i].n ? "n" : "" });
+      if (cell instanceof Node) td.appendChild(cell); else td.innerHTML = cell;
+      tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+  tbl.appendChild(tb); wrap.appendChild(tbl);
+  return wrap;
+}
+const flatChip = (state, value) => { const c = chipEl(state, value, null); c.querySelectorAll(".chip__pv").forEach(x => x.remove()); return c; };
+
+/* ══ 1 · DELIVERY — the fleet-truth ledger ══════════════════════════════════ */
+(function () {
+  const mount = document.getElementById("s-delivery");
+  mount.appendChild(secHead("Delivery", "delivery", null, null, 2));
+  const blk = h("div", { class: "blk" });
+  blk.appendChild(blkHead("per tap process · stamped 14 d", [info("delivery", "delivery")]));
+  blk.appendChild(kpis([
+    ["98.9%", "captured · 4,412 of 4,462 segments", true],
+    ["38", "declared dropped", false, "the tap reclaimed them under ring pressure and named the range"],
+    ["12", "missing · no declaration", false, "sequence gaps nothing accounts for — the finding"],
+    ["1,842", "records dropped at source"]
+  ]));
+  blk.appendChild(table(
+    [{ t: "tap process" }, { t: "engine" }, { t: "captured", n: 1 }, { t: "declared dropped", n: 1 },
+     { t: "missing · no declaration", n: 1, tip: "a sequence gap with no drop declaration" }, { t: "state" }],
+    [
+      ["i07#4", "i07", "118 of 126", "6", "<b>2</b>", flatChip("impaired", "silent")],
+      ["i03#2", "i03", "202 of 205", "0", "<b>3</b>", flatChip("fine", "reporting")],
+      ["i11#3", "i11", "96 of 99", "3", "0", flatChip("indeterminate", "idle or stalled")]
+    ]));
+  blk.appendChild(h("p", { class: "stamp", style: "margin-top:0.45rem" },
+    "<b>3</b> of <b>" + POP.runs + "</b> tap processes with delivery findings · the rest delivered whole or declared their drops"));
+  mount.appendChild(blk);
+})();
+
+/* ══ 2 · STALENESS — the investigation behind the trust chips ═══════════════ */
+(function () {
+  const mount = document.getElementById("s-stale");
+  mount.appendChild(secHead("Staleness", "staleness", null, null, 2));
+  const blk = h("div", { class: "blk" });
+  blk.appendChild(blkHead("quiet tap processes · per-process thresholds", [info("staleness", "staleness")]));
+  blk.appendChild(table(
+    [{ t: "tap process" }, { t: "engine" }, { t: "state" }, { t: "last heard", n: 1 },
+     { t: "own threshold", n: 1, tip: "max(declared cadence, 3 × median observed spacing) from this process's own agent_start" },
+     { t: "quiet for", n: 1 }],
+    [
+      ["i04#3", "i04", flatChip("impaired", "silent"), "11:02Z", "180 s", "<b>3.2 h</b>"],
+      ["i09#2", "i09", flatChip("impaired", "silent"), "12:47Z", "120 s", "<b>1.4 h</b>"],
+      ["i22#5", "i22", flatChip("impaired", "silent"), "13:21Z", "300 s", "<b>52 min</b>"],
+      ["i41#1", "i41", flatChip("impaired", "silent"), "13:40Z", "90 s", "<b>33 min</b>"],
+      ["i63#2", "i63", flatChip("impaired", "silent"), "13:55Z", "150 s", "<b>18 min</b>"],
+      ["i15#6", "i15", flatChip("indeterminate", "idle or stalled"), "14:11Z", "120 s", "—"],
+      ["i28#1", "i28", flatChip("indeterminate", "idle or stalled"), "14:12Z", "180 s", "—"],
+      ["i77#3", "i77", flatChip("indeterminate", "idle or stalled"), "14:13Z", "240 s", "—"]
+    ]));
+  blk.appendChild(h("p", { class: "stamp", style: "margin-top:0.45rem" },
+    "<b>5</b> silent · <b>7</b> idle or stalled (3 shown) · <b>461</b> reporting, not listed · <b>6</b> departed cleanly · <b>1</b> no basis"));
+  mount.appendChild(blk);
+})();
+
+/* ══ 3 · COVERAGE BY ENGINE — the two bases, where divergence is the point ══ */
+(function () {
+  const mount = document.getElementById("s-cov");
+  mount.appendChild(secHead("Coverage", "cov2", null, null, 2));
+  const blk = h("div", { class: "blk" });
+  blk.appendChild(blkHead("both bases · per engine · lowest first", [info("cov2", "coverage bases")]));
+  const meter = v => "<span class='meter" + (v < 0.75 ? " meter--low" : "") + "'><i style='width:" + (v * 100).toFixed(0) + "%'></i></span>" + pct(v, 1);
+  const rows = S5.coverage_by_source.slice().sort((a, b) => a.window_time - b.window_time)
+    .map(s => [s.source,
+      meter(s.window_time),
+      meter(s.token_weighted),
+      "<span class='unit'>" + (Math.abs(s.window_time - s.token_weighted) > 0.1 ? "diverging" : "") + "</span>",
+      flatChip(s.state, null)]);
+  blk.appendChild(table(
+    [{ t: "engine" },
+     { t: "instance-time", n: 1, tip: "was telemetry present · covered time ÷ window time" },
+     { t: "token-weighted", n: 1, tip: "at what coverage the mass was observed" },
+     { t: "", tip: "a large gap between the bases means a few blind minutes held much of the mass" },
+     { t: "state" }],
+    rows));
+  blk.appendChild(h("p", { class: "stamp", style: "margin-top:0.45rem" },
+    "<b>" + S5.coverage_by_source.length + "</b> of <b>" + POP.instances + "</b> engines shown · lowest instance-time first"));
+  mount.appendChild(blk);
+})();
+
+/* ══ 4 · MODEL IDENTITY — declared, per the standing ruling ═════════════════ */
+(function () {
+  const mount = document.getElementById("s-model");
+  mount.appendChild(secHead("Model identity", "model2", null, null, 2));
+  const blk = h("div", { class: "blk" });
+  blk.appendChild(blkHead("declared per engine · never guessed", [info("model2", "model identity")]));
+  const chips = h("div", { style: "display:flex;gap:0.4rem;flex-wrap:wrap" });
+  chips.appendChild(flatChip("fine", S5.models.observed + " declared"));
+  chips.appendChild(flatChip("unobserved", S5.models.unobserved + " undeclared"));
+  blk.appendChild(chips);
+  const n = h("div", { class: "notice", style: "margin-top:0.9rem" });
+  n.appendChild(h("p", { class: "pv notice__h" }, "model undeclared on " + S5.models.unobserved + " engines"));
+  n.appendChild(h("p", { class: "notice__b" },
+    "Cross-engine findings for these engines are <b>indeterminate</b>. Per-engine figures are <b>unaffected</b>."));
+  n.appendChild(h("p", { class: "notice__r" },
+    "To declare: template the kv-events topic (kv@pod@model), or set model in --provenance."));
+  blk.appendChild(n);
+  mount.appendChild(blk);
+})();
+
+/* ══ 5 · INGEST ═════════════════════════════════════════════════════════════ */
+(function () {
+  const mount = document.getElementById("s-ingest");
+  mount.appendChild(secHead("Ingest", "ingest", null, null, 2));
+  const blk = h("div", { class: "blk" });
+  blk.appendChild(blkHead("batches ledger", [info("ingest", "ingest")]));
+  const g = h("div", { class: "facts" });
+  [[int(4412), "segments acknowledged"],
+   ["3", "segments in flight"],
+   [compact(1284000), "events in backlog"],
+   [compact(41882112) + "B", "ingested today"],
+   [compact(AGES.t3.events), "events since install"]
+  ].forEach(([v, u]) => {
+    const d = h("div", { class: "fact" });
+    d.appendChild(h("div", { class: "fact__v" }, v));
+    d.appendChild(h("div", { class: "fact__u" }, u));
+    g.appendChild(d);
+  });
+  blk.appendChild(g);
+  mount.appendChild(blk);
+})();
+</script>
+</body>
+</html>

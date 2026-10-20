@@ -1,0 +1,94 @@
+name: contract canary
+
+# **Enforcement lives where the toolchain lives.**
+#
+# `read-api.md` §8.4.1 names three mechanisms and what each one guards. The analyzer's `contract`
+# job guards freshness: the committed spec matches what its binary emits. Its `openapi::tests`
+# guard the properties generation depends on. Neither runs a generator, because doing so would
+# put a Node toolchain into a pipeline that is otherwise all cargo-native.
+#
+# This job is the third mechanism: the generator actually run, against the analyzer's `main`, on
+# a schedule rather than only when this repo changes. The trade it settles is not detection but
+# attribution latency. A spec regression lands green over there and would otherwise surface days
+# later as a build failure here, with the archaeology that implies. On a schedule it surfaces
+# within hours with the analyzer commit named.
+#
+# It also matches the production posture: the daemon serves the console bundle it shipped with,
+# so skew is nearly impossible in a deployment. **The canary protects development, which is where
+# the risk actually is.**
+
+on:
+  schedule:
+    # Every four hours. The horizon that matters is "before somebody builds on top of a broken
+    # contract", not "instantly".
+    - cron: '17 */4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NPM_CONFIG_IGNORE_SCRIPTS: 'true'
+
+jobs:
+  generate-against-main:
+    runs-on: ubuntu-latest
+    steps:
+      # Actions pinned by commit, with the tag in a comment. A tag is a mutable pointer somebody
+      # else controls, and a repo that pins its own lockfile and refuses install scripts should
+      # not then execute whatever `@v7` happens to mean today. Same SHAs the analyzer pins.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: check out the analyzer's contract
+        # The analyzer is public, so a plain shallow clone reads it: no credential, nothing to
+        # expire. `test -f` guards the one file the rest of the job depends on.
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch main https://github.com/infertap/analyzer.git .analyzer
+          test -f .analyzer/contract/openapi.json || {
+            echo "::error::the analyzer checked out but carries no contract/openapi.json."
+            exit 1
+          }
+
+      - name: name the analyzer commit under test
+        id: upstream
+        run: |
+          set -euo pipefail
+          cd .analyzer
+          {
+            echo "sha=$(git rev-parse HEAD)"
+            echo "short=$(git rev-parse --short HEAD)"
+            echo "subject=$(git log -1 --format=%s)"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: report what moved, in terms a reader can act on
+        # Advisory. The spec moving is normal and expected; what matters is whether it still
+        # generates and still typechecks. This step exists so the failure below has context
+        # attached rather than sending somebody to a 900-line JSON diff.
+        continue-on-error: true
+        run: node scripts/contract-diff.mjs .analyzer/contract/openapi.json
+
+      - name: generate the client from the analyzer's main
+        run: npx openapi-typescript .analyzer/contract/openapi.json -o src/data/generated/api.d.ts
+
+      - name: the generated client still typechecks against this console
+        # **The thing itself.** Everything else guards a proxy for this.
+        run: npm run typecheck
+
+      - name: the corpus still satisfies the contract, and our transcriptions still match it
+        # Catches what typecheck cannot: a cause added or removed, a schema whose `required`
+        # moved, an endpoint the data layer does not call.
+        run: npx vitest run test/contract-parity.test.ts test/fixture-parity.test.ts
+
+      - name: say who broke it
+        if: failure()
+        run: |
+          echo "::error::The console does not build against analyzer ${{ steps.upstream.outputs.short }} (${{ steps.upstream.outputs.subject }})."
+          echo "::error::Pinned here: see contract/PIN.md. Upstream commit: ${{ steps.upstream.outputs.sha }}"
